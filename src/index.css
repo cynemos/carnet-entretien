@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  font-family: 'Roboto', sans-serif;
+  background-color: #0D0D0D; /* Use dark background */
+  color: #E0E0E0; /* Use light text */
+}
+
+/* Custom scrollbar for a sportier look */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1A1A1A;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #FF4500;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #E04000;
+}
+
+/* Define the input style */
+.input {
+  /* Changed text-dark-text to text-white */
+  @apply bg-dark text-white placeholder-gray-500 p-3 rounded-md border border-primary/30 focus:outline-none focus:ring-2 focus:ring-accent;
+}
+
+/* Fix date input text color in some browsers */
+/* This might still show dark text depending on the browser's default date input styling */
+input[type="date"].input {
+  color: #FFFFFF; /* Explicitly set date input text to white */
+}
