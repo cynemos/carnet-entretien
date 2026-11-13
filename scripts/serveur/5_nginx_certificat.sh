@@ -92,7 +92,8 @@ echo "=== Certificat (ajout des deux noms)"
 sudo certbot certonly --nginx --cert-name cyneprod.org --expand \
   -d cyneprod.org -d www.cyneprod.org -d api.cyneprod.org -d lambretta.cyneprod.org \
   -d bultaco.cyneprod.org -d api-bultaco.cyneprod.org \
-  -d aeromag.cyneprod.org -d api-aeromag.cyneprod.org \n  -d carnet.cyneprod.org -d api-carnet.cyneprod.org
+  -d aeromag.cyneprod.org -d api-aeromag.cyneprod.org \
+  -d carnet.cyneprod.org -d api-carnet.cyneprod.org
 sudo systemctl reload nginx
 
 echo "=== Vérification"
