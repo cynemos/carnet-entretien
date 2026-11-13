@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { addMaintenanceEntry } from '../utils/firebaseData';
+import { addMaintenanceEntry } from '../utils/donnees';
 import { MaintenanceEntry } from '../types';
 
 const AddMaintenance: React.FC = () => {

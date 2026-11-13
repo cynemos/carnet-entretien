@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Vehicle } from '../types';
-import { getVehicleById, updateVehicle } from '../utils/firebaseData'; // Import from firebaseData
+import { getVehicleById, updateVehicle } from '../utils/donnees';
 
 const EditVehicle: React.FC = () => {
   const { id } = useParams<{ id: string }>();

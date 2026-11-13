@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Vehicle, MaintenanceEntry, ControleTechniqueEntry } from '../types';
-import { getVehicles } from '../utils/firebaseData'; // Import from firebaseData
+import { getVehicles } from '../utils/donnees';
 import { Bar, Doughnut, Line } from 'react-chartjs-2'; // Import Line
 import {
   Chart as ChartJS,

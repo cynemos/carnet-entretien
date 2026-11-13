@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link, Outlet } from 'react-router-dom';
-import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle } from 'lucide-react';
+import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle, LogOut } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 // Define props for Layout, including the new hasUnreadAlerts prop
 interface LayoutProps {
@@ -45,6 +46,14 @@ const Layout: React.FC<LayoutProps> = ({ hasUnreadAlerts = false }) => { // Defa
             )}
           </Link>
         </nav>
+        <div className="mt-auto pt-8 flex items-center justify-between text-sm text-gray-400">
+          <button type="button" onClick={() => supabase.auth.signOut()}
+            className="flex items-center hover:text-primary transition-colors duration-200">
+            <LogOut size={16} className="mr-2" />
+            Déconnexion
+          </button>
+          <span>v{__APP_VERSION__}</span>
+        </div>
       </aside>
 
       {/* Main Content */}

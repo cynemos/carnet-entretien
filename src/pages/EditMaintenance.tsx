@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getVehicleById, updateMaintenanceEntry } from '../utils/firebaseData';
+import { getVehicleById, updateMaintenanceEntry } from '../utils/donnees';
 import { MaintenanceEntry, Vehicle } from '../types';
 import { ArrowLeft } from 'lucide-react'; // Import ArrowLeft
 

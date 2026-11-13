@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getVehicleById, deletePreviousOwnerEntry } from '../utils/firebaseData';
+import { getVehicleById, deletePreviousOwnerEntry } from '../utils/donnees';
 import { Vehicle, PreviousOwner } from '../types';
 import { ArrowLeft, PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { format, isValid } from 'date-fns';

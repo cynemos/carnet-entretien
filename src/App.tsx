@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import Connexion from './components/Connexion';
 import VehicleList from './pages/VehicleList';
 import VehicleDetail from './pages/VehicleDetail';
 import AddVehicle from './pages/AddVehicle';
@@ -20,6 +21,7 @@ import Alerts from './pages/Alerts'; // Import the new Alerts page
 
 function App() {
   return (
+    <Connexion>
     <Router>
       <Routes>
         <Route path="/" element={<Layout />}>
@@ -41,6 +43,7 @@ function App() {
         </Route>
       </Routes>
     </Router>
+    </Connexion>
   );
 }
 

@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addVehicle } from '../utils/firebaseData'; // Import from firebaseData
+import { addVehicle } from '../utils/donnees';
 import { Vehicle } from '../types';
-import { v4 as uuidv4 } from 'uuid'; // Assuming uuid is already installed
 
 const AddVehicle: React.FC = () => {
   const navigate = useNavigate();

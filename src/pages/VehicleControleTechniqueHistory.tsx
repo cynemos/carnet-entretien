@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2, ExternalLink } from 'lucide-react'; // Import ExternalLink
-import { getVehicleById, deleteControleTechniqueEntry } from '../utils/firebaseData';
+import { getVehicleById, deleteControleTechniqueEntry } from '../utils/donnees';
 import { Vehicle, ControleTechniqueEntry } from '../types';
 import { format, parseISO } from 'date-fns';
 import { fr } from 'date-fns/locale';

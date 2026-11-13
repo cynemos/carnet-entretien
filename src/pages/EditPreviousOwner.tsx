@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getVehicleById, updatePreviousOwnerEntry } from '../utils/firebaseData';
+import { getVehicleById, updatePreviousOwnerEntry } from '../utils/donnees';
 import { PreviousOwner, Vehicle } from '../types';
 import { ArrowLeft } from 'lucide-react';
 

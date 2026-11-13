@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { addControleTechniqueEntry } from '../utils/firebaseData';
+import { addControleTechniqueEntry } from '../utils/donnees';
 import { ControleTechniqueEntry } from '../types';
 
 const ControleTechnique: React.FC = () => {

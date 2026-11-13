@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Vehicle, MaintenanceEntry, ControleTechniqueEntry } from '../types';
-import { getVehicles } from '../utils/firebaseData';
+import { getVehicles } from '../utils/donnees';
 
 const Suivi: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);

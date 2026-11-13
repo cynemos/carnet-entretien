@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { addPreviousOwnerEntry } from '../utils/firebaseData';
+import { addPreviousOwnerEntry } from '../utils/donnees';
 import { PreviousOwner } from '../types';
 import { ArrowLeft } from 'lucide-react';
 

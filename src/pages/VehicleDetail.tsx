@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { getVehicleById, deleteVehicle, deleteMaintenanceEntry, deleteControleTechniqueEntry, deletePreviousOwnerEntry } from '../utils/firebaseData'; // Added deletePreviousOwnerEntry
+import { getVehicleById, deleteVehicle, deleteMaintenanceEntry, deleteControleTechniqueEntry, deletePreviousOwnerEntry } from '../utils/donnees'; // Added deletePreviousOwnerEntry
 import { Vehicle, MaintenanceEntry, ControleTechniqueEntry, PreviousOwner } from '../types'; // Added PreviousOwner
 import { ArrowLeft, PlusCircle, Edit, Trash2, FileText, ExternalLink } from 'lucide-react';
 import { format, isValid } from 'date-fns'; // Import isValid

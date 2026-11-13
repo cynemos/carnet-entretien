@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Vehicle } from '../types';
-import { getVehicles, deleteVehicle } from '../utils/firebaseData';
+import { getVehicles, deleteVehicle } from '../utils/donnees';
 import { Trash2, Edit, PlusCircle } from 'lucide-react'; // Import Edit icon
 
 const VehicleList: React.FC = () => {

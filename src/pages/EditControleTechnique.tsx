@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
-import { getVehicleById, updateControleTechniqueEntry } from '../utils/firebaseData';
+import { getVehicleById, updateControleTechniqueEntry } from '../utils/donnees';
 import { ControleTechniqueEntry, Vehicle } from '../types';
 
 const EditControleTechnique: React.FC = () => {

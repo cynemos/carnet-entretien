@@ -1,11 +1,16 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { readFileSync } from 'node:fs'
+
+const { version } = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf-8'))
 
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  define: {
+    __APP_VERSION__: JSON.stringify(version),
+  },
   optimizeDeps: {
-    // Remove jspdf-autotable exclusion as we are no longer using it
-    exclude: ['chartjs-adapter-date-fns', 'jspdf'] // Keep jspdf exclusion if needed, or remove if simple text works
+    exclude: ['chartjs-adapter-date-fns', 'jspdf']
   }
 })
