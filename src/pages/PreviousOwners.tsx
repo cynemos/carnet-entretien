@@ -104,8 +104,8 @@ const PreviousOwners: React.FC = () => {
         Retour aux détails du véhicule
       </Link>
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-primary">Propriétaires Précédents pour {vehicle.make} {vehicle.model}</h2>
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-primary">Propriétaires Précédents pour {vehicle.make} {vehicle.model}</h2>
         <Link
           to={`/vehicle/${vehicleId}/add-previous-owner`}
           className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
@@ -114,12 +114,12 @@ const PreviousOwners: React.FC = () => {
         </Link>
       </div>
 
-      <div className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30">
+      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
         {vehicle.previousOwners.length === 0 ? (
           <p className="text-light">Aucun ancien propriétaire enregistré pour ce véhicule.</p>
         ) : (
            <div className="overflow-x-auto">
-            <table className="min-w-full bg-secondary text-light">
+            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Nom</th>
@@ -132,13 +132,13 @@ const PreviousOwners: React.FC = () => {
               <tbody>
                 {vehicle.previousOwners.map(owner => (
                     <tr key={owner.id} className="hover:bg-primary/10">
-                      <td className="py-2 px-4 border-b border-primary/30">{owner.name || '-'}</td>
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Nom">{owner.name || '-'}</td>
                       {/* Check if startDate is valid before formatting */}
-                      <td className="py-2 px-4 border-b border-primary/30">{isValid(new Date(owner.startDate)) ? format(new Date(owner.startDate), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Date Début">{isValid(new Date(owner.startDate)) ? format(new Date(owner.startDate), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
                       {/* Check if endDate is valid before formatting */}
-                      <td className="py-2 px-4 border-b border-primary/30">{owner.endDate && isValid(new Date(owner.endDate)) ? format(new Date(owner.endDate), 'dd/MM/yyyy', { locale: fr }) : '-'}</td>
-                      <td className="py-2 px-4 border-b border-primary/30">{calculateDuration(owner.startDate, owner.endDate)}</td>
-                      <td className="py-2 px-4 border-b border-primary/30 text-right">
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Date Fin">{owner.endDate && isValid(new Date(owner.endDate)) ? format(new Date(owner.endDate), 'dd/MM/yyyy', { locale: fr }) : '-'}</td>
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Durée">{calculateDuration(owner.startDate, owner.endDate)}</td>
+                      <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                         <Link
                           to={`/vehicle/${vehicleId}/edit-previous-owner/${owner.id}`}
                           className="text-primary hover:text-orange-600 mr-3"

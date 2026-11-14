@@ -48,8 +48,8 @@ const AddVehicle: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-3xl font-bold text-primary mb-6">Ajouter un nouveau véhicule</h2>
-      <form onSubmit={handleSubmit} className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30 space-y-4">
+      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Ajouter un nouveau véhicule</h2>
+      <form onSubmit={handleSubmit} className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 space-y-4">
         <div>
           <label htmlFor="type" className="block text-light/80 text-sm font-medium mb-1">Type</label>
           <select

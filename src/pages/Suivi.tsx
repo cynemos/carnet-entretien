@@ -44,7 +44,7 @@ const Suivi: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-3xl font-bold text-primary mb-6">Suivi des Véhicules</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Suivi des Véhicules</h2>
 
       {vehicles.length === 0 ? (
         <p className="text-center text-light">Aucun véhicule ajouté pour le moment.</p>
@@ -55,7 +55,7 @@ const Suivi: React.FC = () => {
             const lastControleTechnique = findLatestEntry(vehicle.controleTechniqueHistory);
 
             return (
-              <div key={vehicle.id} className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30">
+              <div key={vehicle.id} className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
                 <h3 className="text-xl font-semibold text-light mb-4">{vehicle.year} {vehicle.make} {vehicle.model}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

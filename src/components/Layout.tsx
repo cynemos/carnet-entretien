@@ -1,6 +1,6 @@
-import React from 'react';
-import { Link, Outlet } from 'react-router-dom';
-import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle, LogOut } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle, LogOut, Menu, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 
 // Define props for Layout, including the new hasUnreadAlerts prop
@@ -10,10 +10,30 @@ interface LayoutProps {
 
 // Update the component signature to accept props
 const Layout: React.FC<LayoutProps> = ({ hasUnreadAlerts = false }) => { // Default to false if not provided
+  // Téléphone : la barre latérale devient un menu escamotable, refermé à chaque changement de page
+  const [menuOuvert, setMenuOuvert] = useState(false);
+  const { pathname } = useLocation();
+  useEffect(() => setMenuOuvert(false), [pathname]);
+
   return (
     <div className="flex min-h-screen bg-dark text-light">
-      {/* Sidebar */}
-      <aside className="w-64 bg-secondary p-6 flex flex-col">
+      {/* Bandeau du haut, téléphone uniquement */}
+      <header className="md:hidden fixed top-0 inset-x-0 z-30 h-14 flex items-center justify-between px-4 bg-secondary border-b border-primary/30">
+        <Link to="/" className="flex items-center">
+          <Car size={26} color="#FF4500" className="mr-2" />
+          <span className="text-lg font-bold text-primary">Carnets d'entretien</span>
+        </Link>
+        <button type="button" onClick={() => setMenuOuvert(o => !o)} aria-label={menuOuvert ? 'Fermer le menu' : 'Ouvrir le menu'}
+          aria-expanded={menuOuvert} className="p-2 -mr-2 text-light hover:text-primary">
+          {menuOuvert ? <X size={26} /> : <Menu size={26} />}
+        </button>
+      </header>
+      {menuOuvert && (
+        <div className="md:hidden fixed inset-0 z-30 bg-black/60" onClick={() => setMenuOuvert(false)} aria-hidden="true" />
+      )}
+
+      {/* Sidebar : fixe sur ordinateur, tiroir sur téléphone */}
+      <aside className={`w-64 bg-secondary p-6 flex flex-col fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:static md:translate-x-0 md:z-auto ${menuOuvert ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center mb-8">
           <Car size={32} color="#FF4500" className="mr-2" />
           <h1 className="text-xl font-bold text-primary">Carnets d'entretien</h1>
@@ -57,7 +77,7 @@ const Layout: React.FC<LayoutProps> = ({ hasUnreadAlerts = false }) => { // Defa
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto bg-dark bg-racing-stripes bg-repeat">
+      <main className="flex-1 min-w-0 px-4 pb-6 pt-20 md:p-8 overflow-y-auto bg-dark bg-racing-stripes bg-repeat">
         <Outlet />
       </main>
     </div>

@@ -87,7 +87,7 @@ const VehicleControleTechniqueHistory: React.FC = () => {
       {sortedHistory.length > 0 ? (
         <div className="space-y-4">
           {sortedHistory.map((entry) => (
-            <div key={entry.id} className="bg-secondary p-4 rounded-md shadow-md flex justify-between items-center">
+            <div key={entry.id} className="bg-secondary p-4 rounded-md shadow-md flex flex-wrap justify-between items-center gap-3">
               <div>
                 <p className="text-light font-semibold">{format(parseISO(entry.date), 'dd/MM/yyyy', { locale: fr })} - {entry.mileage} km</p>
                 <p className="text-gray-400 text-sm">Validité: {entry.validity}</p>
@@ -114,7 +114,7 @@ const VehicleControleTechniqueHistory: React.FC = () => {
                     </p>
                   )}
               </div>
-              <div className="flex space-x-2">
+              <div className="flex flex-wrap gap-2">
                  <Link
                     to={`/vehicle/${vehicleId}/edit-controle-technique/${entry.id}`}
                     className="text-blue-400 hover:text-blue-500"

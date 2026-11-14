@@ -124,7 +124,7 @@ const Alerts: React.FC = () => {
 
   return (
     <div className="container mx-auto p-4">
-      <h2 className="text-3xl font-bold text-primary mb-6">Alertes</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Alertes</h2>
 
       {vehicles.length === 0 ? (
         <p className="text-center text-light">Aucun véhicule ajouté pour le moment.</p>

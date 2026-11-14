@@ -37,3 +37,14 @@ body {
 input[type="date"].input {
   color: #FFFFFF; /* Explicitly set date input text to white */
 }
+
+/* Téléphone : chaque ligne de tableau devient une carte, l'intitulé de colonne devant chaque valeur */
+@media (max-width: 767px) {
+  .table-cartes thead { display: none; }
+  .table-cartes, .table-cartes tbody, .table-cartes tr, .table-cartes td { display: block; width: 100%; }
+  .table-cartes tr { border: 1px solid rgb(255 69 0 / 0.3); border-radius: 0.5rem; padding: 0.5rem 0.75rem; margin-bottom: 0.75rem; }
+  .table-cartes td { border: 0 !important; padding: 0.25rem 0 !important; text-align: left !important; display: flex; gap: 0.75rem; }
+  .table-cartes td::before { content: attr(data-label); flex: 0 0 6.5rem; color: #9ca3af; font-size: 0.8rem; }
+  .table-cartes td[data-label="Actions"] { justify-content: flex-end; }
+  .table-cartes td[data-label="Actions"]::before { content: none; }
+}

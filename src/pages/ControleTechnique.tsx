@@ -67,11 +67,11 @@ const ControleTechnique: React.FC = () => {
         Retour au véhicule
       </Link>
 
-      <h2 className="text-3xl font-bold text-primary mb-6">Ajouter un Contrôle Technique</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Ajouter un Contrôle Technique</h2>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30"
+        className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input

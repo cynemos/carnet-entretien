@@ -443,28 +443,28 @@ const Stats: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-3xl font-bold text-primary mb-6">Statistiques de la Flotte</h2>
+      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Statistiques de la Flotte</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Mileage Evolution Chart */}
-        <div className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30 lg:col-span-2"> {/* Make it span full width */}
+        <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 lg:col-span-2"> {/* Make it span full width */}
            <Line data={mileageEvolutionData} options={mileageEvolutionOptions} />
         </div>
 
         {/* Total Cost per Vehicle Chart */}
-        <div className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30">
+        <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
           <Bar data={totalCostPerVehicleData} options={totalCostPerVehicleOptions} />
         </div>
 
         {/* Maintenance Entry Count per Vehicle Chart */}
-        <div className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30">
+        <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
            <Bar data={entryCountPerVehicleData} options={entryCountPerVehicleOptions} />
         </div>
 
          {/* Total Cost by Maintenance Type Chart */}
          {/* Only show if there are costs categorized */}
          {filteredCosts.length > 0 && (
-           <div className="bg-secondary rounded-lg shadow-lg p-6 border border-primary/30 lg:col-span-2 flex justify-center">
+           <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 lg:col-span-2 flex justify-center">
              {/* Doughnut chart might look better centered or in a smaller container */}
              <div className="w-full max-w-md"> {/* Limit width for Doughnut */}
                <Doughnut data={totalCostByTypeData} options={totalCostByTypeOptions} />

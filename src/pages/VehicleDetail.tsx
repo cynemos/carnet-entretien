@@ -129,9 +129,9 @@ const VehicleDetail: React.FC = () => {
         Retour à la liste des véhicules
       </Link>
 
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-3xl font-bold text-primary">{vehicle.make} {vehicle.model} ({vehicle.year})</h2>
-        <div className="flex space-x-2">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
+        <h2 className="text-2xl md:text-3xl font-bold text-primary">{vehicle.make} {vehicle.model} ({vehicle.year})</h2>
+        <div className="flex flex-wrap gap-2">
            <button
             onClick={handleDeleteVehicle}
             className="bg-danger hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
@@ -141,8 +141,8 @@ const VehicleDetail: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-secondary rounded-lg shadow-lg p-6 mb-8 border border-primary/30">
-        <h3 className="text-2xl font-semibold text-primary mb-4">Informations Générales</h3>
+      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+        <h3 className="text-xl md:text-2xl font-semibold text-primary mb-4">Informations Générales</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-light">
           <p><strong>Type:</strong> {vehicle.type}</p>
           <p><strong>Marque:</strong> {vehicle.make}</p>
@@ -181,10 +181,10 @@ const VehicleDetail: React.FC = () => {
       </div>
 
       {/* Maintenance History Section */}
-      <div className="bg-secondary rounded-lg shadow-lg p-6 mb-8 border border-primary/30">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-2xl font-semibold text-primary">Historique de Maintenance</h3>
-          <div className="flex space-x-2">
+      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+          <h3 className="text-xl md:text-2xl font-semibold text-primary">Historique de Maintenance</h3>
+          <div className="flex flex-wrap gap-2">
              <button
               onClick={handleGeneratePDF}
               className="bg-accent hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
@@ -204,7 +204,7 @@ const VehicleDetail: React.FC = () => {
           <p className="text-light">Aucune entrée de maintenance enregistrée pour ce véhicule.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full bg-secondary text-light">
+            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Date</th>
@@ -219,11 +219,11 @@ const VehicleDetail: React.FC = () => {
                 {vehicle.maintenanceHistory.map(entry => (
                   <tr key={entry.id} className="hover:bg-primary/10">
                     {/* Check if entry.date is valid before formatting */}
-                    <td className="py-2 px-4 border-b border-primary/30">{isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
-                    <td className="py-2 px-4 border-b border-primary/30">{entry.mileage} km</td>
-                    <td className="py-2 px-4 border-b border-primary/30">{entry.description}</td>
-                    <td className="py-2 px-4 border-b border-primary/30 text-right">{entry.totalCost.toFixed(2)} €</td>
-                     <td className="py-2 px-4 border-b border-primary/30">
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Date">{isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Kilométrage">{entry.mileage} km</td>
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Description">{entry.description}</td>
+                    <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Coût Total">{entry.totalCost.toFixed(2)} €</td>
+                     <td className="py-2 px-4 border-b border-primary/30" data-label="Documents">
                       {/* Display the two Google Drive links if they exist */}
                       {entry.googleDriveLink1 && (
                         <a href={entry.googleDriveLink1} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center mb-1">
@@ -243,7 +243,7 @@ const VehicleDetail: React.FC = () => {
                       )}
                        {!entry.googleDriveLink1 && !entry.googleDriveLink2 && !entry.invoiceUrl && '-'} {/* Display '-' if no links */}
                     </td>
-                    <td className="py-2 px-4 border-b border-primary/30 text-right">
+                    <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                       <Link
                         to={`/vehicle/${vehicleId}/edit-maintenance/${entry.id}`}
                         className="text-primary hover:text-orange-600 mr-3"
@@ -268,10 +268,10 @@ const VehicleDetail: React.FC = () => {
       </div>
 
        {/* Controle Technique History Section */}
-      <div className="bg-secondary rounded-lg shadow-lg p-6 mb-8 border border-primary/30">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-2xl font-semibold text-primary">Historique Contrôle Technique</h3>
-           <div className="flex space-x-2">
+      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+          <h3 className="text-xl md:text-2xl font-semibold text-primary">Historique Contrôle Technique</h3>
+           <div className="flex flex-wrap gap-2">
              {/* Add CT PDF Export Button Here if needed */}
             <Link
               to={`/vehicle/${vehicleId}/add-controle-technique`}
@@ -286,7 +286,7 @@ const VehicleDetail: React.FC = () => {
           <p className="text-light">Aucune entrée de Contrôle Technique enregistrée pour ce véhicule.</p>
         ) : (
            <div className="overflow-x-auto">
-            <table className="min-w-full bg-secondary text-light">
+            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Date</th>
@@ -301,11 +301,11 @@ const VehicleDetail: React.FC = () => {
                 {vehicle.controleTechniqueHistory.map(entry => (
                   <tr key={entry.id} className="hover:bg-primary/10">
                     {/* Check if entry.date is valid before formatting */}
-                    <td className="py-2 px-4 border-b border-primary/30">{isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
-                    <td className="py-2 px-4 border-b border-primary/30">{entry.mileage} km</td>
-                    <td className="py-2 px-4 border-b border-primary/30">{entry.validity}</td>
-                    <td className="py-2 px-4 border-b border-primary/30">{entry.majorFailures || '-'}</td>
-                     <td className="py-2 px-4 border-b border-primary/30">
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Date">{isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Kilométrage">{entry.mileage} km</td>
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Validité">{entry.validity}</td>
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Défauts Majeurs">{entry.majorFailures || '-'}</td>
+                     <td className="py-2 px-4 border-b border-primary/30" data-label="Document">
                        {entry.reportUrl && (
                         <a href={entry.reportUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center">
                           Rapport GCS <ExternalLink size={16} className="ml-1"/>
@@ -318,7 +318,7 @@ const VehicleDetail: React.FC = () => {
                       )}
                        {!entry.reportUrl && !entry.googleDriveLink && '-'}
                     </td> {/* Display link */}
-                    <td className="py-2 px-4 border-b border-primary/30 text-right">
+                    <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                        <Link
                         to={`/vehicle/${vehicleId}/edit-controle-technique/${entry.id}`}
                         className="text-primary hover:text-orange-600 mr-3"
@@ -343,10 +343,10 @@ const VehicleDetail: React.FC = () => {
       </div>
 
        {/* Previous Owners Section */}
-       <div className="bg-secondary rounded-lg shadow-lg p-6 mb-8 border border-primary/30">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-2xl font-semibold text-primary">Propriétaires Précédents</h3>
-           <div className="flex space-x-2">
+       <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+        <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
+          <h3 className="text-xl md:text-2xl font-semibold text-primary">Propriétaires Précédents</h3>
+           <div className="flex flex-wrap gap-2">
             <Link
               to={`/vehicle/${vehicleId}/add-previous-owner`}
               className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
@@ -360,7 +360,7 @@ const VehicleDetail: React.FC = () => {
           <p className="text-light">Aucun ancien propriétaire enregistré pour ce véhicule.</p>
         ) : (
            <div className="overflow-x-auto">
-            <table className="min-w-full bg-secondary text-light">
+            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Nom</th>
@@ -388,13 +388,13 @@ const VehicleDetail: React.FC = () => {
 
                   return (
                     <tr key={owner.id} className="hover:bg-primary/10">
-                      <td className="py-2 px-4 border-b border-primary/30">{owner.name || '-'}</td>
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Nom">{owner.name || '-'}</td>
                       {/* Check if startDate is valid before formatting */}
-                      <td className="py-2 px-4 border-b border-primary/30">{isValid(startDate) ? format(startDate, 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Date Début">{isValid(startDate) ? format(startDate, 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
                       {/* Check if endDate is valid before formatting */}
-                      <td className="py-2 px-4 border-b border-primary/30">{isValid(endDate) ? format(endDate, 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
-                      <td className="py-2 px-4 border-b border-primary/30">{duration}</td>
-                      <td className="py-2 px-4 border-b border-primary/30 text-right">
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Date Fin">{isValid(endDate) ? format(endDate, 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
+                      <td className="py-2 px-4 border-b border-primary/30" data-label="Durée">{duration}</td>
+                      <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                         <Link
                           to={`/vehicle/${vehicleId}/edit-previous-owner/${owner.id}`}
                           className="text-primary hover:text-orange-600 mr-3"
