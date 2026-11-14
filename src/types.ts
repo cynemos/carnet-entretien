@@ -19,9 +19,57 @@ export interface Vehicle {
   soldDate?: string; // renseignée = véhicule vendu
   photoPath?: string; // chemin dans le stockage du serveur
   carteGrisePath?: string;
+  purchasePrice?: number; // prix d'achat (€)
+  salePrice?: number; // prix de vente (€), avec soldDate
+  ficheTechnique: LigneFiche[]; // aide-mémoire : huile, pneus, références…
   maintenanceHistory: MaintenanceEntry[];
   controleTechniqueHistory: ControleTechniqueEntry[];
   previousOwners: PreviousOwner[];
+  depenses: Depense[];
+  travaux: Travail[];
+  photos: PhotoGalerie[];
+}
+
+export interface LigneFiche {
+  libelle: string;
+  valeur: string;
+}
+
+// Frais hors entretien : assurance, carte grise, stockage, carburant…
+export interface Depense {
+  id: string;
+  date: string;
+  categorie: string;
+  montant: number;
+  libelle: string;
+}
+
+// Travail à faire ; une fois fait, il peut pointer vers l'entretien correspondant
+export interface Travail {
+  id: string;
+  titre: string;
+  details?: string;
+  priorite: 1 | 2 | 3;
+  coutEstime?: number;
+  faitLe?: string;
+  entretienId?: string;
+}
+
+export interface PhotoGalerie {
+  id: string;
+  chemin: string;
+  date?: string;
+  legende?: string;
+}
+
+export interface Partage {
+  id: string;
+  jeton: string;
+  expireLe: string;
+  revoque: boolean;
+  avecMontants: boolean;
+  avecFactures: boolean;
+  createdAt: string;
 }
 
 export interface MaintenanceEntry {
@@ -32,6 +80,7 @@ export interface MaintenanceEntry {
   partsCost: number;
   laborCost: number;
   totalCost: number; // Calculated: partsCost + laborCost
+  categorie: string; // code de src/utils/categories.ts
   invoiceUrl?: string; // URL to the invoice file in storage (if using storage - kept for backward compatibility if needed)
   googleDriveLink1?: string; // Optional Google Drive link 1
   googleDriveLink2?: string; // Optional Google Drive link 2
@@ -64,3 +113,6 @@ export interface PreviousOwner {
   endDate: string; // ISO date string 'YYYY-MM-DD'
   duration?: string; // Calculated duration (e.g., '2 ans 3 mois')
 }
+
+// Champs saisis dans les formulaires Ajouter / Modifier un véhicule
+export type FormulaireVehicule = Omit<Vehicle, 'id' | 'maintenanceHistory' | 'controleTechniqueHistory' | 'previousOwners' | 'depenses' | 'travaux' | 'photos' | 'ficheTechnique'>;

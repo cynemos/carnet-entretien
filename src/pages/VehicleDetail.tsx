@@ -9,6 +9,13 @@ import Chargement from '../components/Chargement';
 import { PhotoVehicule, LienFichier } from '../components/Fichiers';
 import ReleveKm from '../components/ReleveKm';
 import { libelleType, kmActuel, estVendu } from '../utils/alertes';
+import { libelleCategorie } from '../utils/categories';
+import BilanVehicule from '../components/fiche/BilanVehicule';
+import TravauxAFaire from '../components/fiche/TravauxAFaire';
+import FraisAnnexes from '../components/fiche/FraisAnnexes';
+import FicheTechnique from '../components/fiche/FicheTechnique';
+import Galerie from '../components/fiche/Galerie';
+import PartageLecture from '../components/fiche/PartageLecture';
 
 const VehicleDetail: React.FC = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
@@ -196,6 +203,9 @@ const VehicleDetail: React.FC = () => {
         </div>
       </section>
 
+      <BilanVehicule vehicle={vehicle} />
+      {!estVendu(vehicle) && <TravauxAFaire vehicle={vehicle} onChange={fetchVehicle} />}
+
       {/* Maintenance History Section */}
       <div className="panneau rounded-lg p-4 md:p-6 mb-8 border border-primary/30">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
@@ -237,7 +247,10 @@ const VehicleDetail: React.FC = () => {
                     {/* Check if entry.date is valid before formatting */}
                     <td className="py-2 px-4 border-b border-primary/30" data-label="Date">{isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</td>
                     <td className="py-2 px-4 border-b border-primary/30" data-label="Kilométrage">{entry.mileage} km</td>
-                    <td className="py-2 px-4 border-b border-primary/30" data-label="Description">{entry.description}</td>
+                    <td className="py-2 px-4 border-b border-primary/30" data-label="Description">
+                      <span className="inline-block text-[0.65rem] font-titre uppercase tracking-wider px-1.5 py-0.5 mr-2 rounded bg-primary/15 text-primary/90 align-middle">{libelleCategorie(entry.categorie)}</span>
+                      {entry.description}
+                    </td>
                     <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Coût Total">{entry.totalCost.toFixed(2)} €</td>
                      <td className="py-2 px-4 border-b border-primary/30" data-label="Documents">
                       {entry.facturePath && <div className="mb-1"><LienFichier chemin={entry.facturePath} libelle="Facture" /></div>}
@@ -359,6 +372,10 @@ const VehicleDetail: React.FC = () => {
         )}
       </div>
 
+      <FraisAnnexes vehicle={vehicle} onChange={fetchVehicle} />
+      <FicheTechnique vehicle={vehicle} onChange={fetchVehicle} />
+      <Galerie vehicle={vehicle} onChange={fetchVehicle} />
+
        {/* Previous Owners Section */}
        <div className="panneau rounded-lg p-4 md:p-6 mb-8 border border-primary/30">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
@@ -436,7 +453,7 @@ const VehicleDetail: React.FC = () => {
         )}
       </div>
 
-
+      <PartageLecture vehicle={vehicle} />
     </div>
   );
 };

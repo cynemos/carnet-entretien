@@ -5,6 +5,8 @@ import { getVehicleById, updateMaintenanceEntry } from '../utils/donnees';
 import { MaintenanceEntry } from '../types';
 import Chargement from '../components/Chargement';
 import { ArrowLeft } from 'lucide-react'; // Import ArrowLeft
+import ChampCategorie from '../components/ChampCategorie';
+import { devinerCategorie } from '../utils/categories';
 
 const EditMaintenance: React.FC = () => {
   const { vehicleId, entryId } = useParams<{ vehicleId: string; entryId: string }>();
@@ -14,6 +16,7 @@ const EditMaintenance: React.FC = () => {
   const [date, setDate] = useState('');
   const [mileage, setMileage] = useState('');
   const [description, setDescription] = useState('');
+  const [categorie, setCategorie] = useState('');
   const [partsCost, setPartsCost] = useState('');
   const [laborCost, setLaborCost] = useState('');
   // Reverted state for two Google Drive links
@@ -40,6 +43,7 @@ const EditMaintenance: React.FC = () => {
             setDate(foundEntry.date);
             setMileage(foundEntry.mileage.toString());
             setDescription(foundEntry.description);
+            setCategorie(foundEntry.categorie === 'autre' ? '' : foundEntry.categorie);
             setPartsCost(foundEntry.partsCost.toString());
             setLaborCost(foundEntry.laborCost.toString());
             // Load existing two links
@@ -76,6 +80,7 @@ const EditMaintenance: React.FC = () => {
       date,
       mileage: parseInt(mileage, 10),
       description,
+      categorie: categorie || devinerCategorie(description),
       partsCost: parseFloat(partsCost || '0'),
       laborCost: parseFloat(laborCost || '0'),
       totalCost: parseFloat(partsCost || '0') + parseFloat(laborCost || '0'), // Recalculate total
@@ -144,6 +149,7 @@ const EditMaintenance: React.FC = () => {
             placeholder="Kilométrage"
             required
           />
+          <ChampCategorie valeur={categorie} description={description} onChange={setCategorie} className="md:col-span-2" />
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}

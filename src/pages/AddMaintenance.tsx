@@ -1,17 +1,23 @@
 import React, { useState } from 'react';
 import { ChampFichier } from '../components/Fichiers';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
+import ChampCategorie from '../components/ChampCategorie';
+import { devinerCategorie } from '../utils/categories';
 import { ArrowLeft } from 'lucide-react';
-import { addMaintenanceEntry } from '../utils/donnees';
+import { addMaintenanceEntry, modifierTravail } from '../utils/donnees';
 import { MaintenanceEntry } from '../types';
 
 const AddMaintenance: React.FC = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
   const navigate = useNavigate();
+  // Venue d'un « travail à faire » : description pré-remplie, travail coché une fois l'entretien enregistré
+  const [parametres] = useSearchParams();
+  const travailId = parametres.get('travail');
 
   const [date, setDate] = useState('');
   const [mileage, setMileage] = useState('');
-  const [description, setDescription] = useState('');
+  const [description, setDescription] = useState(parametres.get('description') ?? '');
+  const [categorie, setCategorie] = useState('');
   const [partsCost, setPartsCost] = useState('');
   const [laborCost, setLaborCost] = useState('');
   // Reverted state for two Google Drive links
@@ -45,6 +51,7 @@ const AddMaintenance: React.FC = () => {
       date,
       mileage: parseInt(mileage, 10),
       description,
+      categorie: categorie || devinerCategorie(description),
       partsCost: parseFloat(partsCost || '0'),
       laborCost: parseFloat(laborCost || '0'),
       // Include the two Google Drive links if provided
@@ -55,7 +62,8 @@ const AddMaintenance: React.FC = () => {
 
     try {
       // Call the updated addMaintenanceEntry function
-      await addMaintenanceEntry(vehicleId, newEntryData);
+      const nouvelId = await addMaintenanceEntry(vehicleId, newEntryData);
+      if (travailId) await modifierTravail(travailId, { faitLe: date, entretienId: nouvelId });
       console.log('Maintenance entry saved successfully!');
       navigate(`/vehicle/${vehicleId}`);
     } catch (error) {
@@ -97,6 +105,7 @@ const AddMaintenance: React.FC = () => {
             placeholder="Kilométrage"
             required
           />
+          <ChampCategorie valeur={categorie} description={description} onChange={setCategorie} className="md:col-span-2" />
           <textarea
             value={description}
             onChange={e => setDescription(e.target.value)}

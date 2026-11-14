@@ -1,16 +1,17 @@
 import React from 'react';
 import { Vehicle } from '../types';
 
-export type Suivi = Pick<Vehicle, 'currentMileage' | 'ctIntervalYears' | 'maintenanceIntervalMonths' | 'maintenanceIntervalKm' | 'soldDate'>;
+export type Suivi = Pick<Vehicle, 'currentMileage' | 'ctIntervalYears' | 'maintenanceIntervalMonths' | 'maintenanceIntervalKm' | 'soldDate' | 'purchasePrice' | 'salePrice'>;
 
 export const SUIVI_PAR_DEFAUT: Suivi = { ctIntervalYears: 2, maintenanceIntervalMonths: 12 };
 
 const entier = (v: string) => (v === '' ? undefined : Math.max(0, Math.round(Number(v))));
+const montant = (v: string) => (v === '' ? undefined : Math.max(0, Number(v)));
 
-// Réglages de suivi d'un véhicule : compteur, échéances, vente
+// Réglages de suivi d'un véhicule : compteur, échéances, achat et vente
 const ChampsSuivi: React.FC<{ valeur: Suivi; onChange: (v: Partial<Suivi>) => void }> = ({ valeur, onChange }) => (
   <fieldset className="border border-primary/25 rounded-lg p-4 space-y-4">
-    <legend className="px-2 font-titre uppercase tracking-wider text-sm text-primary">Suivi et échéances</legend>
+    <legend className="px-2 font-titre uppercase tracking-wider text-sm text-primary">Suivi, achat et vente</legend>
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <label className="block">
         <span>Kilométrage actuel</span>
@@ -36,9 +37,19 @@ const ChampsSuivi: React.FC<{ valeur: Suivi; onChange: (v: Partial<Suivi>) => vo
           value={valeur.maintenanceIntervalKm ?? ''} onChange={e => onChange({ maintenanceIntervalKm: entier(e.target.value) || undefined })} />
       </label>
       <label className="block sm:col-span-2">
+        <span>Prix d'achat (€, facultatif)</span>
+        <input type="number" min={0} step="0.01" inputMode="decimal" className="input w-full mt-1"
+          value={valeur.purchasePrice ?? ''} onChange={e => onChange({ purchasePrice: montant(e.target.value) })} />
+      </label>
+      <label className="block">
         <span>Vendu le (laisser vide s'il est toujours là)</span>
         <input type="date" className="input w-full mt-1"
           value={valeur.soldDate ?? ''} onChange={e => onChange({ soldDate: e.target.value || undefined })} />
+      </label>
+      <label className="block">
+        <span>Prix de vente (€)</span>
+        <input type="number" min={0} step="0.01" inputMode="decimal" className="input w-full mt-1"
+          value={valeur.salePrice ?? ''} onChange={e => onChange({ salePrice: montant(e.target.value) })} />
       </label>
     </div>
   </fieldset>

@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addVehicle } from '../utils/donnees';
-import { Vehicle } from '../types';
+import { FormulaireVehicule } from '../types';
 import ChampsSuivi, { SUIVI_PAR_DEFAUT } from '../components/ChampsSuivi';
 
 const AddVehicle: React.FC = () => {
   const navigate = useNavigate();
-  const [vehicleData, setVehicleData] = useState<Omit<Vehicle, 'id' | 'maintenanceHistory' | 'controleTechniqueHistory' | 'previousOwners'>>({ // Updated Omit
+  const [vehicleData, setVehicleData] = useState<FormulaireVehicule>({ // Updated Omit
     type: '',
     make: '',
     model: '',

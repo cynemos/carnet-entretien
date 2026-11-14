@@ -20,14 +20,18 @@ import Chargement from './components/Chargement';
 
 // Chart.js n'est chargé qu'à l'ouverture des statistiques
 const Stats = lazy(() => import('./pages/Stats'));
+// Carnet partagé en lecture seule : seule page accessible sans compte
+const PagePartage = lazy(() => import('./pages/PagePartage'));
+const Recherche = lazy(() => import('./pages/Recherche'));
 
 
 function App() {
   return (
-    <Connexion>
     <Router>
       <Routes>
-        <Route path="/" element={<Layout />}>
+        <Route path="/partage/:jeton" element={<Suspense fallback={<Chargement />}><PagePartage /></Suspense>} />
+        <Route path="/" element={<Connexion><Layout /></Connexion>}>
+          <Route path="recherche" element={<Suspense fallback={<Chargement />}><Recherche /></Suspense>} />
           <Route index element={<VehicleList />} />
           <Route path="add-vehicle" element={<AddVehicle />} />
           <Route path="vehicle/:vehicleId" element={<VehicleDetail />} />
@@ -47,7 +51,6 @@ function App() {
         </Route>
       </Routes>
     </Router>
-    </Connexion>
   );
 }
 

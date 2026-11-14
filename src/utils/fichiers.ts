@@ -55,3 +55,12 @@ export const supprimerFichiersVehicule = async (vehicleId: string) => {
   const { data } = await supabase.storage.from(DOSSIER).list(`vehicules/${vehicleId}`, { limit: 1000 });
   await supprimerFichiers((data ?? []).map(f => `vehicules/${vehicleId}/${f.name}`));
 };
+
+// Liens signés de longue durée, pour un partage en lecture seule : { chemin: lien }
+export const liensPartage = async (chemins: string[], secondes: number): Promise<Record<string, string>> => {
+  const liste = [...new Set(chemins.filter(Boolean))];
+  if (!liste.length) return {};
+  const { data, error } = await supabase.storage.from(DOSSIER).createSignedUrls(liste, secondes);
+  if (error) throw new Error(`Liens de fichiers impossibles : ${error.message}`);
+  return Object.fromEntries((data ?? []).filter(d => d.signedUrl && d.path).map(d => [d.path as string, d.signedUrl as string]));
+};

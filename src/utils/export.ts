@@ -1,6 +1,7 @@
 // Exports téléchargeables : sauvegarde complète (JSON) et entretiens pour un tableur (CSV)
 import { Vehicle } from '../types';
 import { libelleType } from './alertes';
+import { libelleCategorie } from './categories';
 
 const aujourdhui = () => new Date().toISOString().slice(0, 10);
 
@@ -24,11 +25,11 @@ const cellule = (v: unknown) => {
 };
 
 export const exporterCSV = (vehicules: Vehicle[]) => {
-  const entetes = ['Véhicule', 'Type', 'Plaque', 'Date', 'Kilométrage', 'Description', 'Pièces (€)', "Main-d'œuvre (€)", 'Total (€)'];
+  const entetes = ['Véhicule', 'Type', 'Plaque', 'Date', 'Kilométrage', 'Catégorie', 'Description', 'Pièces (€)', "Main-d'œuvre (€)", 'Total (€)'];
   const lignes = vehicules.flatMap(v => [...v.maintenanceHistory]
     .sort((a, b) => a.date.localeCompare(b.date))
     .map(e => [`${v.year} ${v.make} ${v.model}`, libelleType(v.type), v.licensePlate ?? '', e.date, e.mileage,
-      e.description, e.partsCost, e.laborCost, e.totalCost]));
+      libelleCategorie(e.categorie), e.description, e.partsCost, e.laborCost, e.totalCost]));
   const csv = [entetes, ...lignes].map(l => l.map(cellule).join(';')).join('\r\n');
   telecharger('﻿' + csv, 'text/csv;charset=utf-8', `entretiens-${aujourdhui()}.csv`);
 };

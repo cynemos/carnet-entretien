@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Vehicle } from '../types';
+import { FormulaireVehicule } from '../types';
 import Chargement from '../components/Chargement';
 import ChampsSuivi from '../components/ChampsSuivi';
 import { ChampFichier } from '../components/Fichiers';
@@ -9,7 +9,7 @@ import { getVehicleById, updateVehicle } from '../utils/donnees';
 const EditVehicle: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const [vehicleData, setVehicleData] = useState<Omit<Vehicle, 'id' | 'maintenanceHistory' | 'controleTechniqueHistory' | 'previousOwners'> | null>(null); // Updated Omit
+  const [vehicleData, setVehicleData] = useState<FormulaireVehicule | null>(null); // Updated Omit
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,6 +42,8 @@ const EditVehicle: React.FC = () => {
               soldDate: existingVehicle.soldDate,
               photoPath: existingVehicle.photoPath,
               carteGrisePath: existingVehicle.carteGrisePath,
+              purchasePrice: existingVehicle.purchasePrice,
+              salePrice: existingVehicle.salePrice,
             });
           } else {
             setError("Véhicule non trouvé.");

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle, LogOut, Menu, X } from 'lucide-react';
+import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle, LogOut, Menu, X, Search } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { getVehicles } from '../utils/donnees';
 import { compterAlertesActives } from '../utils/alertes';
@@ -10,6 +10,7 @@ const LIENS = [
   { to: '/', label: 'Ma flotte', icone: Car, fin: true },
   { to: '/add-vehicle', label: 'Ajouter un véhicule', icone: PlusCircle },
   { to: '/stats', label: 'Statistiques', icone: BarChart2 },
+  { to: '/recherche', label: 'Recherche', icone: Search },
   { to: '/suivi', label: 'Suivi', icone: ListChecks },
   { to: '/alerts', label: 'Alertes', icone: AlertTriangle, badge: true },
 ];

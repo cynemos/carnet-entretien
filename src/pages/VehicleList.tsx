@@ -7,6 +7,7 @@ import { Trash2, Edit, PlusCircle, Wrench, Gauge, AlertTriangle, ChevronRight, D
 import Chargement from '../components/Chargement';
 import { PhotoVehicule } from '../components/Fichiers';
 import { exporterJSON, exporterCSV } from '../utils/export';
+import ImportSauvegarde from '../components/ImportSauvegarde';
 
 // Affiche un nombre sur des rouleaux de compteur
 const Compteur: React.FC<{ valeur: string }> = ({ valeur }) => (
@@ -82,7 +83,10 @@ const VehicleList: React.FC = () => {
       </section>
 
       {vehicles.length === 0 ? (
-        <p className="text-center text-light font-machine">Le garage est vide. Ajoutez votre premier véhicule.</p>
+        <div className="text-center space-y-4">
+          <p className="text-light font-machine">Le garage est vide. Ajoutez votre premier véhicule.</p>
+          <ImportSauvegarde onTermine={fetchVehicles} />
+        </div>
       ) : (
         <>
         {[{ titre: '', liste: vehicles.filter(v => !estVendu(v)) }, { titre: 'Ils ont quitté le garage', liste: vehicles.filter(estVendu) }]
@@ -131,6 +135,7 @@ const VehicleList: React.FC = () => {
           <span className="w-full text-center font-titre uppercase tracking-wider text-xs text-light/50">Exporter toutes les données</span>
           <button onClick={() => exporterJSON(vehicles)} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary/10 text-sm"><Download size={16} /> Sauvegarde complète (JSON)</button>
           <button onClick={() => exporterCSV(vehicles)} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-primary/40 text-primary hover:bg-primary/10 text-sm"><Download size={16} /> Entretiens (CSV)</button>
+          <ImportSauvegarde onTermine={fetchVehicles} />
         </div>
         </>
       )}
