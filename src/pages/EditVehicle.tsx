@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Vehicle } from '../types';
+import Chargement from '../components/Chargement';
 import { getVehicleById, updateVehicle } from '../utils/donnees';
 
 const EditVehicle: React.FC = () => {
@@ -81,11 +82,11 @@ const EditVehicle: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center text-light">Chargement...</div>;
+    return <Chargement texte="Chargement…" />;
   }
 
   if (error) {
-     return <div className="text-center text-red-500">{error}</div>;
+     return <div className="text-center text-rouille">{error}</div>;
   }
 
   if (!vehicleData) {
@@ -95,8 +96,8 @@ const EditVehicle: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Modifier le véhicule</h2>
-      <form onSubmit={handleSubmit} className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 space-y-4">
+      <h2 className="titre-page">Modifier le véhicule</h2>
+      <form onSubmit={handleSubmit} className="panneau rounded-lg p-4 md:p-6 border border-primary/30 space-y-4">
         <div>
           <label htmlFor="type" className="block text-light/80 text-sm font-medium mb-1">Type</label>
           <select
@@ -243,10 +244,10 @@ const EditVehicle: React.FC = () => {
             placeholder="Ex: AB-123-CD"
           />
         </div>
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+        {error && <p className="text-rouille text-sm">{error}</p>}
         <button
           type="submit"
-          className="w-full bg-primary text-secondary font-bold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50"
+          className="w-full bg-primary text-secondary font-bold py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50"
           disabled={loading}
         >
           {loading ? 'Enregistrement...' : 'Enregistrer les modifications'}

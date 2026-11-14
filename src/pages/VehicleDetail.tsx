@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getVehicleById, deleteVehicle, deleteMaintenanceEntry, deleteControleTechniqueEntry, deletePreviousOwnerEntry } from '../utils/donnees'; // Added deletePreviousOwnerEntry
-import { Vehicle, MaintenanceEntry, ControleTechniqueEntry, PreviousOwner } from '../types'; // Added PreviousOwner
+import { Vehicle } from '../types';
 import { ArrowLeft, PlusCircle, Edit, Trash2, FileText, ExternalLink } from 'lucide-react';
 import { format, isValid } from 'date-fns'; // Import isValid
 import { fr } from 'date-fns/locale';
-import { generateVehicleHistoryPdf } from '../utils/pdfGenerator'; // Corrected import name
+import Chargement from '../components/Chargement';
+import sansPhoto from '../assets/sans-photo.svg';
+import { libelleType } from '../utils/alertes';
 
 const VehicleDetail: React.FC = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
@@ -27,14 +29,14 @@ const VehicleDetail: React.FC = () => {
         vehicleData.maintenanceHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         vehicleData.controleTechniqueHistory.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
         // Sort previous owners by end date descending
-        vehicleData.previousOwners.sort((a, b) => new Date(b.endDate).getTime() - new Date(b.endDate).getTime()); // Fixed sort key
+        vehicleData.previousOwners.sort((a, b) => new Date(b.endDate).getTime() - new Date(a.endDate).getTime());
         setVehicle(vehicleData);
       } else {
         setError("Vehicle not found.");
       }
     } catch (err) {
       console.error("Error fetching vehicle:", err);
-      setError("Failed to load vehicle details.");
+      setError("Erreur lors du chargement du véhicule.");
     } finally {
       setLoading(false);
     }
@@ -100,100 +102,104 @@ const VehicleDetail: React.FC = () => {
   };
 
 
-  const handleGeneratePDF = () => {
-    if (vehicle) {
-      generateVehicleHistoryPdf(vehicle); // Corrected function call
-    }
+  // jsPDF n'est chargé qu'au moment de l'export
+  const handleGeneratePDF = async () => {
+    if (!vehicle) return;
+    const { generateVehicleHistoryPdf } = await import('../utils/pdfGenerator');
+    generateVehicleHistoryPdf(vehicle);
   };
 
 
   if (loading) {
-    return <div className="container mx-auto text-center text-light">Chargement...</div>;
+    return <Chargement texte="Chargement…" />;
   }
 
   if (error) {
-    return <div className="container mx-auto text-center text-danger">Erreur : {error}</div>;
+    return <div className="container mx-auto text-center text-rouille">Erreur : {error}</div>;
   }
 
   if (!vehicle) {
-    return <div className="container mx-auto text-center text-danger">Véhicule introuvable.</div>;
+    return <div className="container mx-auto text-center text-rouille">Véhicule introuvable.</div>;
   }
+
+  const kmActuels = Math.max(vehicle.initialMileage || 0, ...vehicle.maintenanceHistory.map(e => e.mileage || 0),
+    ...vehicle.controleTechniqueHistory.map(e => e.mileage || 0));
+  const dateFr = (d?: string) => d && isValid(new Date(d)) ? format(new Date(d), 'dd/MM/yyyy', { locale: fr }) : '—';
 
   return (
     <div className="container mx-auto">
       <Link
         to="/"
-        className="flex items-center mb-4 text-accent hover:text-blue-400 transition-colors duration-200"
+        className="flex items-center mb-4 text-accent hover:text-accent-clair transition-colors duration-200"
       >
         <ArrowLeft size={20} className="mr-2" />
-        Retour à la liste des véhicules
+        Retour au garage
       </Link>
 
-      <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary">{vehicle.make} {vehicle.model} ({vehicle.year})</h2>
-        <div className="flex flex-wrap gap-2">
-           <button
-            onClick={handleDeleteVehicle}
-            className="bg-danger hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
-          >
-            <Trash2 size={18} className="mr-2"/> Supprimer Véhicule
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
-        <h3 className="text-xl md:text-2xl font-semibold text-primary mb-4">Informations Générales</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-light">
-          <p><strong>Type:</strong> {vehicle.type}</p>
-          <p><strong>Marque:</strong> {vehicle.make}</p>
-          <p><strong>Modèle:</strong> {vehicle.model}</p>
-          <p><strong>Année:</strong> {vehicle.year}</p>
-          <p><strong>Kilométrage Initial:</strong> {vehicle.initialMileage} km</p>
-          {/* Check if purchaseDate is valid before formatting */}
-          <p><strong>Date d'achat:</strong> {isValid(new Date(vehicle.purchaseDate)) ? format(new Date(vehicle.purchaseDate), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</p>
-           {vehicle.firstRegistrationDate && (
-             // Check if firstRegistrationDate is valid before formatting
-             <p><strong>1ère mise en circulation:</strong> {isValid(new Date(vehicle.firstRegistrationDate)) ? format(new Date(vehicle.firstRegistrationDate), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}</p>
-           )}
-          {vehicle.vin && <p><strong>VIN:</strong> {vehicle.vin}</p>}
-          {/* New: Display License Plate */}
-          {vehicle.licensePlate && <p><strong>Plaque:</strong> {vehicle.licensePlate}</p>}
-          {/* Display Carte Grise Google Drive Link */}
-          {vehicle.carteGriseGoogleDriveLink && (
-            <p className="md:col-span-2">
-              <strong>Carte Grise:</strong>{' '}
-              <a
-                href={vehicle.carteGriseGoogleDriveLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-accent hover:underline flex items-center inline-flex" // Use inline-flex to keep icon next to text
-              >
-                Voir sur Google Drive <ExternalLink size={16} className="ml-1"/>
-              </a>
-            </p>
-          )}
-          {vehicle.imageUrl && (
-            <div className="md:col-span-2">
-              <strong>Image:</strong> <img src={vehicle.imageUrl} alt={`${vehicle.make} ${vehicle.model}`} className="mt-2 max-h-40 rounded-md"/>
+      {/* Fiche signalétique du véhicule */}
+      <section className="panneau rounded-xl p-5 md:p-8 mb-8">
+        <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,22rem)_1fr] gap-6 lg:gap-10 items-start">
+          <div className="p-2 bg-[#efe4cc] rounded-sm shadow-[0_6px_16px_rgba(0,0,0,0.6)] rotate-[-1.2deg]">
+            <img src={vehicle.imageUrl || sansPhoto} alt={`${vehicle.make} ${vehicle.model}`} className="w-full h-56 object-cover sepia-[.35]" />
+            <p className="font-machine text-[#3a2d20] text-center text-sm pt-2">{vehicle.make} {vehicle.model} — {vehicle.year}</p>
+          </div>
+          <div>
+            <p className="font-titre uppercase tracking-[0.25em] text-xs text-primary/80">{libelleType(vehicle.type)}</p>
+            <h2 className="titre-page !mb-4">{vehicle.make} <span className="text-light">{vehicle.model}</span></h2>
+            <div className="flex flex-wrap items-center gap-4 mb-6">
+              {vehicle.licensePlate && <span className="plaque text-lg">{vehicle.licensePlate}</span>}
+              <span className="compteur text-xl" aria-label={`${kmActuels} km`}>
+                {String(kmActuels).padStart(6, '0').split('').map((c, i) => <span key={i}>{c}</span>)}
+                <span className="sep">km</span>
+              </span>
             </div>
-          )}
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-light">
+              {([
+                ['Année', String(vehicle.year)],
+                ["Kilométrage à l'achat", `${vehicle.initialMileage.toLocaleString('fr-FR')} km`],
+                ["Date d'achat", dateFr(vehicle.purchaseDate)],
+                ['1re mise en circulation', dateFr(vehicle.firstRegistrationDate)],
+                ['N° de série (VIN)', vehicle.vin || '—'],
+                ['Entretiens enregistrés', String(vehicle.maintenanceHistory.length)],
+              ] as const).map(([k, v]) => (
+                <div key={k} className="border-b border-dashed border-primary/20 pb-1.5">
+                  <dt className="font-titre uppercase tracking-wider text-[0.7rem] text-primary/80">{k}</dt>
+                  <dd className="font-machine break-all">{v}</dd>
+                </div>
+              ))}
+            </dl>
+            <div className="flex flex-wrap gap-3 mt-6">
+              {vehicle.carteGriseGoogleDriveLink && (
+                <a href={vehicle.carteGriseGoogleDriveLink} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-accent/50 text-accent hover:bg-accent/10 font-titre uppercase tracking-wider text-sm">
+                  Carte grise <ExternalLink size={16} />
+                </a>
+              )}
+              <Link to={`/edit-vehicle/${vehicle.id}`} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-primary/50 text-primary hover:bg-primary/10 font-titre uppercase tracking-wider text-sm">
+                <Edit size={16} /> Modifier
+              </Link>
+              <button onClick={handleDeleteVehicle} className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-rouille/60 text-rouille hover:bg-rouille/10 font-titre uppercase tracking-wider text-sm">
+                <Trash2 size={16} /> Supprimer
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      </section>
 
       {/* Maintenance History Section */}
-      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+      <div className="panneau rounded-lg p-4 md:p-6 mb-8 border border-primary/30">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <h3 className="text-xl md:text-2xl font-semibold text-primary">Historique de Maintenance</h3>
+          <h3 className="text-xl md:text-2xl font-titre uppercase tracking-wider text-primary">Historique de Maintenance</h3>
           <div className="flex flex-wrap gap-2">
              <button
               onClick={handleGeneratePDF}
-              className="bg-accent hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+              className="bg-accent hover:brightness-110 font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
             >
               <FileText size={18} className="mr-2"/> Exporter PDF
             </button>
             <Link
               to={`/vehicle/${vehicleId}/add-maintenance`}
-              className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+              className="bg-primary text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
             >
               <PlusCircle size={18} className="mr-2"/> Ajouter Entrée
             </Link>
@@ -204,14 +210,14 @@ const VehicleDetail: React.FC = () => {
           <p className="text-light">Aucune entrée de maintenance enregistrée pour ce véhicule.</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
+            <table className="table-cartes min-w-full text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Date</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Kilométrage</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Description</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-right">Coût Total</th>
-                   <th className="py-2 px-4 border-b border-primary/30 text-left">Documents</th> {/* Updated column header */}
+                   <th className="py-2 px-4 border-b border-primary/30 text-left">Documents</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-right">Actions</th>
                 </tr>
               </thead>
@@ -246,14 +252,14 @@ const VehicleDetail: React.FC = () => {
                     <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                       <Link
                         to={`/vehicle/${vehicleId}/edit-maintenance/${entry.id}`}
-                        className="text-primary hover:text-orange-600 mr-3"
+                        className="text-primary hover:text-primary-fonce mr-3"
                         title="Modifier"
                       >
                         <Edit size={18} />
                       </Link>
                       <button
                         onClick={() => handleDeleteMaintenance(entry.id)}
-                        className="text-danger hover:text-red-700"
+                        className="text-rouille hover:text-rouille"
                         title="Supprimer"
                       >
                         <Trash2 size={18} />
@@ -268,14 +274,14 @@ const VehicleDetail: React.FC = () => {
       </div>
 
        {/* Controle Technique History Section */}
-      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+      <div className="panneau rounded-lg p-4 md:p-6 mb-8 border border-primary/30">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <h3 className="text-xl md:text-2xl font-semibold text-primary">Historique Contrôle Technique</h3>
+          <h3 className="text-xl md:text-2xl font-titre uppercase tracking-wider text-primary">Historique Contrôle Technique</h3>
            <div className="flex flex-wrap gap-2">
              {/* Add CT PDF Export Button Here if needed */}
             <Link
               to={`/vehicle/${vehicleId}/add-controle-technique`}
-              className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+              className="bg-primary text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
             >
               <PlusCircle size={18} className="mr-2"/> Ajouter CT
             </Link>
@@ -286,14 +292,14 @@ const VehicleDetail: React.FC = () => {
           <p className="text-light">Aucune entrée de Contrôle Technique enregistrée pour ce véhicule.</p>
         ) : (
            <div className="overflow-x-auto">
-            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
+            <table className="table-cartes min-w-full text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Date</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Kilométrage</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Validité</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Défauts Majeurs</th>
-                   <th className="py-2 px-4 border-b border-primary/30 text-left">Document</th> {/* New column */}
+                   <th className="py-2 px-4 border-b border-primary/30 text-left">Document</th>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Actions</th>
                 </tr>
               </thead>
@@ -321,14 +327,14 @@ const VehicleDetail: React.FC = () => {
                     <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                        <Link
                         to={`/vehicle/${vehicleId}/edit-controle-technique/${entry.id}`}
-                        className="text-primary hover:text-orange-600 mr-3"
+                        className="text-primary hover:text-primary-fonce mr-3"
                         title="Modifier"
                       >
                         <Edit size={18} />
                       </Link>
                       <button
                         onClick={() => handleDeleteControleTechnique(entry.id)}
-                        className="text-danger hover:text-red-700"
+                        className="text-rouille hover:text-rouille"
                         title="Supprimer"
                       >
                         <Trash2 size={18} />
@@ -343,13 +349,13 @@ const VehicleDetail: React.FC = () => {
       </div>
 
        {/* Previous Owners Section */}
-       <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 mb-8 border border-primary/30">
+       <div className="panneau rounded-lg p-4 md:p-6 mb-8 border border-primary/30">
         <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
-          <h3 className="text-xl md:text-2xl font-semibold text-primary">Propriétaires Précédents</h3>
+          <h3 className="text-xl md:text-2xl font-titre uppercase tracking-wider text-primary">Propriétaires Précédents</h3>
            <div className="flex flex-wrap gap-2">
             <Link
               to={`/vehicle/${vehicleId}/add-previous-owner`}
-              className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+              className="bg-primary text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
             >
               <PlusCircle size={18} className="mr-2"/> Ajouter Propriétaire
             </Link>
@@ -360,7 +366,7 @@ const VehicleDetail: React.FC = () => {
           <p className="text-light">Aucun ancien propriétaire enregistré pour ce véhicule.</p>
         ) : (
            <div className="overflow-x-auto">
-            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
+            <table className="table-cartes min-w-full text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Nom</th>
@@ -397,14 +403,14 @@ const VehicleDetail: React.FC = () => {
                       <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                         <Link
                           to={`/vehicle/${vehicleId}/edit-previous-owner/${owner.id}`}
-                          className="text-primary hover:text-orange-600 mr-3"
+                          className="text-primary hover:text-primary-fonce mr-3"
                           title="Modifier"
                         >
                           <Edit size={18} />
                         </Link>
                         <button
                           onClick={() => handleDeletePreviousOwner(owner.id)} // Implement delete function
-                          className="text-danger hover:text-red-700"
+                          className="text-rouille hover:text-rouille"
                           title="Supprimer"
                         >
                           <Trash2 size={18} />

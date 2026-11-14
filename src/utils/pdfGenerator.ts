@@ -1,6 +1,7 @@
 import { jsPDF } from 'jspdf';
 import { Vehicle } from '../types';
 import { format, isValid, differenceInDays } from 'date-fns'; // Import date-fns functions
+import { libelleType } from './alertes';
 import { fr } from 'date-fns/locale'; // Import French locale
 
 export const generateVehicleHistoryPdf = (vehicle: Vehicle) => {
@@ -29,7 +30,7 @@ export const generateVehicleHistoryPdf = (vehicle: Vehicle) => {
       if (yOffset > pageHeight - margin * 2) { // Check if close to bottom margin
           doc.addPage();
           yOffset = margin; // Reset yOffset for new page
-          addPageNumber(doc, doc.internal.getNumberOfPages()); // Add page number to new page
+          addPageNumber(doc, doc.getNumberOfPages()); // Add page number to new page
       }
   };
 
@@ -43,7 +44,7 @@ export const generateVehicleHistoryPdf = (vehicle: Vehicle) => {
   // Vehicle Details
   doc.setFontSize(12);
   doc.setTextColor(0); // Reset text color to black
-  doc.text(`Type: ${vehicle.type}`, margin, yOffset); yOffset += lineHeight;
+  doc.text(`Type: ${libelleType(vehicle.type)}`, margin, yOffset); yOffset += lineHeight;
   doc.text(`Kilométrage initial: ${vehicle.initialMileage} km`, margin, yOffset); yOffset += lineHeight;
   // Check if purchaseDate is valid before formatting
   doc.text(`Date d'achat: ${isValid(new Date(vehicle.purchaseDate)) ? format(new Date(vehicle.purchaseDate), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}`, margin, yOffset); yOffset += lineHeight;
@@ -179,7 +180,7 @@ export const generateVehicleHistoryPdf = (vehicle: Vehicle) => {
 
 
    // Add footer on the last page (or first if only one page)
-   addPageNumber(doc, doc.internal.getNumberOfPages());
+   addPageNumber(doc, doc.getNumberOfPages());
 
 
   // Save the PDF

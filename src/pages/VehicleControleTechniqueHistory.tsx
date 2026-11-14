@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Edit, Trash2, ExternalLink } from 'lucide-react'; // Import ExternalLink
 import { getVehicleById, deleteControleTechniqueEntry } from '../utils/donnees';
-import { Vehicle, ControleTechniqueEntry } from '../types';
+import { Vehicle } from '../types';
 import { format, parseISO } from 'date-fns';
+import Chargement from '../components/Chargement';
 import { fr } from 'date-fns/locale';
 
 const VehicleControleTechniqueHistory: React.FC = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
-  const navigate = useNavigate();
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,7 +29,7 @@ const VehicleControleTechniqueHistory: React.FC = () => {
         }
       } catch (err) {
         console.error("Error fetching vehicle:", err);
-        setError("Failed to load vehicle data.");
+        setError("Erreur lors du chargement du véhicule.");
       } finally {
         setLoading(false);
       }
@@ -39,7 +39,7 @@ const VehicleControleTechniqueHistory: React.FC = () => {
   }, [vehicleId]);
 
   const handleDeleteControleTechnique = async (entryId: string) => {
-    if (!vehicleId || !confirm("Are you sure you want to delete this Controle Technique entry?")) {
+    if (!vehicleId || !confirm("Supprimer ce contrôle technique ? Cette action est définitive.")) {
       return;
     }
     try {
@@ -51,21 +51,21 @@ const VehicleControleTechniqueHistory: React.FC = () => {
       }
     } catch (err) {
       console.error("Error deleting Controle Technique entry:", err);
-      alert("Failed to delete Controle Technique entry.");
+      alert("Erreur lors de la suppression du contrôle technique.");
     }
   };
 
 
   if (loading) {
-    return <div className="text-center text-light">Chargement de l'historique CT...</div>;
+    return <Chargement texte="Chargement de l'historique CT…" />;
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return <div className="text-center text-rouille">{error}</div>;
   }
 
   if (!vehicle) {
-    return <div className="text-center text-red-500">Véhicule non trouvé.</div>;
+    return <div className="text-center text-rouille">Véhicule non trouvé.</div>;
   }
 
   const sortedHistory = vehicle.controleTechniqueHistory
@@ -76,13 +76,13 @@ const VehicleControleTechniqueHistory: React.FC = () => {
     <div className="container mx-auto p-4">
       <Link
         to={`/vehicle/${vehicleId}`}
-        className="flex items-center mb-4 text-accent hover:text-blue-400 transition-colors duration-200"
+        className="flex items-center mb-4 text-accent hover:text-accent-clair transition-colors duration-200"
       >
         <ArrowLeft size={20} className="mr-2" />
         Retour au véhicule
       </Link>
 
-      <h1 className="text-2xl font-bold text-primary mb-6">Historique Contrôle Technique - {vehicle.make} {vehicle.model}</h1>
+      <h1 className="titre-page">Historique Contrôle Technique - {vehicle.make} {vehicle.model}</h1>
 
       {sortedHistory.length > 0 ? (
         <div className="space-y-4">
@@ -107,7 +107,7 @@ const VehicleControleTechniqueHistory: React.FC = () => {
                         href={entry.reportUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-blue-400 hover:underline ml-1 flex items-center"
+                        className="text-accent hover:underline ml-1 flex items-center"
                       >
                         Voir <ExternalLink size={14} className="ml-1" />
                       </a>
@@ -117,14 +117,14 @@ const VehicleControleTechniqueHistory: React.FC = () => {
               <div className="flex flex-wrap gap-2">
                  <Link
                     to={`/vehicle/${vehicleId}/edit-controle-technique/${entry.id}`}
-                    className="text-blue-400 hover:text-blue-500"
+                    className="text-accent hover:text-accent-clair"
                     title="Modifier"
                   >
                     <Edit size={20} />
                   </Link>
                 <button
                   onClick={() => handleDeleteControleTechnique(entry.id)}
-                  className="text-red-400 hover:text-red-500"
+                  className="text-rouille hover:text-rouille"
                   title="Supprimer"
                 >
                   <Trash2 size={20} />

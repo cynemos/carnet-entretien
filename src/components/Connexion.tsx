@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import type { Session } from '@supabase/supabase-js';
-import { Car } from 'lucide-react';
+import Embleme from './Embleme';
+import Chargement from './Chargement';
 import { supabase } from '../lib/supabase';
 
 // Application privée : tant que personne n'est connecté, seul le formulaire est affiché.
@@ -28,31 +29,32 @@ const Connexion: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   };
 
   if (session === undefined) {
-    return <div className="min-h-screen bg-dark text-light flex items-center justify-center">Chargement…</div>;
+    return <div className="min-h-screen flex items-center justify-center"><Chargement /></div>;
   }
   if (session) return <>{children}</>;
 
   return (
-    <div className="min-h-screen bg-dark text-light flex items-center justify-center p-4">
-      <form onSubmit={seConnecter} className="w-full max-w-sm bg-secondary rounded-lg shadow-lg p-6 border border-primary/30 space-y-4">
-        <div className="flex items-center mb-2">
-          <Car size={32} color="#FF4500" className="mr-2" />
-          <h1 className="text-xl font-bold text-primary">Carnets d'entretien</h1>
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <form onSubmit={seConnecter} className="panneau w-full max-w-sm rounded-xl px-7 pt-8 pb-9 space-y-5">
+        <div className="flex flex-col items-center text-center mb-2">
+          <Embleme taille={96} className="drop-shadow-[0_6px_12px_rgba(0,0,0,0.7)] mb-4" />
+          <h1 className="font-display text-3xl text-primary" style={{ textShadow: '0 2px 0 #000' }}>Carnets d'entretien</h1>
+          <p className="font-titre uppercase tracking-[0.3em] text-xs text-light/60 mt-2">Atelier · accès réservé</p>
         </div>
         <label className="block">
-          <span className="text-sm text-gray-300">Email</span>
+          <span className="font-titre uppercase tracking-wider text-xs text-primary/90">Email</span>
           <input type="email" required autoComplete="username" value={email} onChange={e => setEmail(e.target.value)}
-            className="mt-1 w-full p-2 rounded bg-dark border border-gray-600 text-light focus:outline-none focus:border-primary" />
+            className="input mt-1 w-full" />
         </label>
         <label className="block">
-          <span className="text-sm text-gray-300">Mot de passe</span>
+          <span className="font-titre uppercase tracking-wider text-xs text-primary/90">Mot de passe</span>
           <input type="password" required autoComplete="current-password" value={motDePasse} onChange={e => setMotDePasse(e.target.value)}
-            className="mt-1 w-full p-2 rounded bg-dark border border-gray-600 text-light focus:outline-none focus:border-primary" />
+            className="input mt-1 w-full" />
         </label>
-        {erreur && <p className="text-red-500 text-sm">{erreur}</p>}
+        {erreur && <p className="text-rouille text-sm">{erreur}</p>}
         <button type="submit" disabled={envoi}
-          className="w-full bg-primary text-secondary font-semibold px-4 py-2 rounded-md hover:bg-orange-600 transition-colors duration-200 disabled:opacity-60">
-          {envoi ? 'Connexion…' : 'Se connecter'}
+          className="w-full bg-primary px-4 py-2.5 rounded-md disabled:opacity-60">
+          {envoi ? 'Ouverture…' : 'Entrer au garage'}
         </button>
       </form>
     </div>

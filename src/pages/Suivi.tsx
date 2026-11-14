@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Vehicle, MaintenanceEntry, ControleTechniqueEntry } from '../types';
+import { Vehicle } from '../types';
+import Chargement from '../components/Chargement';
 import { getVehicles } from '../utils/donnees';
 
 const Suivi: React.FC = () => {
@@ -35,16 +36,16 @@ const Suivi: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="text-center text-light">Chargement des données de suivi...</div>;
+    return <Chargement texte="Chargement des données de suivi…" />;
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return <div className="text-center text-rouille">{error}</div>;
   }
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Suivi des Véhicules</h2>
+      <h2 className="titre-page">Suivi des Véhicules</h2>
 
       {vehicles.length === 0 ? (
         <p className="text-center text-light">Aucun véhicule ajouté pour le moment.</p>
@@ -55,7 +56,7 @@ const Suivi: React.FC = () => {
             const lastControleTechnique = findLatestEntry(vehicle.controleTechniqueHistory);
 
             return (
-              <div key={vehicle.id} className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
+              <div key={vehicle.id} className="panneau rounded-lg p-4 md:p-6 border border-primary/30">
                 <h3 className="text-xl font-semibold text-light mb-4">{vehicle.year} {vehicle.make} {vehicle.model}</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

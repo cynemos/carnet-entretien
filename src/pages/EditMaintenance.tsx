@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getVehicleById, updateMaintenanceEntry } from '../utils/donnees';
-import { MaintenanceEntry, Vehicle } from '../types';
+import { MaintenanceEntry } from '../types';
+import Chargement from '../components/Chargement';
 import { ArrowLeft } from 'lucide-react'; // Import ArrowLeft
 
 const EditMaintenance: React.FC = () => {
@@ -50,7 +51,7 @@ const EditMaintenance: React.FC = () => {
         }
       } catch (err) {
         console.error("Error fetching entry:", err);
-        setError("Failed to load maintenance entry.");
+        setError("Erreur lors du chargement de l'entretien.");
       } finally {
         setLoading(false);
       }
@@ -94,15 +95,15 @@ const EditMaintenance: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="container mx-auto text-center text-light">Chargement...</div>;
+    return <Chargement texte="Chargement…" />;
   }
 
   if (error) {
-    return <div className="container mx-auto text-center text-danger">Erreur : {error}</div>;
+    return <div className="container mx-auto text-center text-rouille">Erreur : {error}</div>;
   }
 
   if (!entry) {
-     return <div className="container mx-auto text-center text-danger">Entrée de maintenance introuvable.</div>;
+     return <div className="container mx-auto text-center text-rouille">Entrée de maintenance introuvable.</div>;
   }
 
 
@@ -110,17 +111,17 @@ const EditMaintenance: React.FC = () => {
     <div className="container mx-auto">
       <Link
         to={`/vehicle/${vehicleId}`}
-        className="flex items-center mb-4 text-accent hover:text-blue-400 transition-colors duration-200"
+        className="flex items-center mb-4 text-accent hover:text-accent-clair transition-colors duration-200"
       >
         <ArrowLeft size={20} className="mr-2" />
         Retour au véhicule
       </Link>
 
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Modifier l'entrée de maintenance</h2>
+      <h2 className="titre-page">Modifier l'entrée de maintenance</h2>
 
       <form
         onSubmit={handleSubmit}
-        className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30"
+        className="panneau rounded-lg p-4 md:p-6 border border-primary/30"
       >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <input
@@ -196,7 +197,7 @@ const EditMaintenance: React.FC = () => {
         <div className="flex items-center justify-between mt-6">
           <button
             type="submit"
-            className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-primary text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
           >
             Enregistrer les modifications
           </button>

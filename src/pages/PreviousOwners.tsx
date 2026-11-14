@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getVehicleById, deletePreviousOwnerEntry } from '../utils/donnees';
-import { Vehicle, PreviousOwner } from '../types';
+import { Vehicle } from '../types';
 import { ArrowLeft, PlusCircle, Edit, Trash2 } from 'lucide-react';
 import { format, isValid } from 'date-fns';
+import Chargement from '../components/Chargement';
 import { fr } from 'date-fns/locale';
 
 const PreviousOwners: React.FC = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
-  const navigate = useNavigate();
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -30,7 +30,7 @@ const PreviousOwners: React.FC = () => {
       }
     } catch (err) {
       console.error("Error fetching vehicle data:", err);
-      setError("Failed to load vehicle data.");
+      setError("Erreur lors du chargement du véhicule.");
     } finally {
       setLoading(false);
     }
@@ -55,15 +55,15 @@ const PreviousOwners: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="container mx-auto text-center text-light">Chargement...</div>;
+    return <Chargement texte="Chargement…" />;
   }
 
   if (error) {
-    return <div className="container mx-auto text-center text-danger">Erreur : {error}</div>;
+    return <div className="container mx-auto text-center text-rouille">Erreur : {error}</div>;
   }
 
   if (!vehicle) {
-    return <div className="container mx-auto text-center text-danger">Véhicule introuvable. Impossible de charger les propriétaires précédents.</div>;
+    return <div className="container mx-auto text-center text-rouille">Véhicule introuvable. Impossible de charger les propriétaires précédents.</div>;
   }
 
    // Helper to calculate duration
@@ -98,28 +98,28 @@ const PreviousOwners: React.FC = () => {
     <div className="container mx-auto">
       <Link
         to={`/vehicle/${vehicleId}`} // Link back to the specific vehicle detail page
-        className="flex items-center mb-4 text-accent hover:text-blue-400 transition-colors duration-200"
+        className="flex items-center mb-4 text-accent hover:text-accent-clair transition-colors duration-200"
       >
         <ArrowLeft size={20} className="mr-2" />
         Retour aux détails du véhicule
       </Link>
 
       <div className="flex flex-wrap justify-between items-center gap-3 mb-6">
-        <h2 className="text-2xl md:text-3xl font-bold text-primary">Propriétaires Précédents pour {vehicle.make} {vehicle.model}</h2>
+        <h2 className="titre-page !mb-0">Propriétaires Précédents pour {vehicle.make} {vehicle.model}</h2>
         <Link
           to={`/vehicle/${vehicleId}/add-previous-owner`}
-          className="bg-primary hover:bg-orange-600 text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
+          className="bg-primary text-secondary font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline flex items-center"
         >
           <PlusCircle size={18} className="mr-2"/> Ajouter Propriétaire
         </Link>
       </div>
 
-      <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
+      <div className="panneau rounded-lg p-4 md:p-6 border border-primary/30">
         {vehicle.previousOwners.length === 0 ? (
           <p className="text-light">Aucun ancien propriétaire enregistré pour ce véhicule.</p>
         ) : (
            <div className="overflow-x-auto">
-            <table className="table-cartes min-w-full bg-secondary text-light text-sm md:text-base">
+            <table className="table-cartes min-w-full text-light text-sm md:text-base">
               <thead>
                 <tr>
                   <th className="py-2 px-4 border-b border-primary/30 text-left">Nom</th>
@@ -141,14 +141,14 @@ const PreviousOwners: React.FC = () => {
                       <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                         <Link
                           to={`/vehicle/${vehicleId}/edit-previous-owner/${owner.id}`}
-                          className="text-primary hover:text-orange-600 mr-3"
+                          className="text-primary hover:text-primary-fonce mr-3"
                           title="Modifier"
                         >
                           <Edit size={18} />
                         </Link>
                         <button
                           onClick={() => handleDeletePreviousOwner(owner.id)}
-                          className="text-danger hover:text-red-700"
+                          className="text-rouille hover:text-rouille"
                           title="Supprimer"
                         >
                           <Trash2 size={18} />

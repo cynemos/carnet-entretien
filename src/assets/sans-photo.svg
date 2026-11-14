@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 340" role="img" aria-label="Pas de photo">
+  <!-- Illustration originale : croquis d'un roadster sur papier calque -->
+  <defs>
+    <radialGradient id="p" cx="50%" cy="45%" r="75%">
+      <stop offset="0" stop-color="#3a2d20"/>
+      <stop offset="1" stop-color="#1a130d"/>
+    </radialGradient>
+  </defs>
+  <rect width="600" height="340" fill="url(#p)"/>
+  <g stroke="#d4943a" stroke-opacity=".08">
+    <path d="M0 40H600M0 80H600M0 120H600M0 160H600M0 200H600M0 240H600M0 280H600M0 320H600"/>
+    <path d="M40 0V340M80 0V340M120 0V340M160 0V340M200 0V340M240 0V340M280 0V340M320 0V340M360 0V340M400 0V340M440 0V340M480 0V340M520 0V340M560 0V340"/>
+  </g>
+  <g fill="none" stroke="#d4943a" stroke-width="4" stroke-linecap="round" stroke-linejoin="round" opacity=".75">
+    <path d="M95 225c0-22 10-38 34-44l70-14c22-26 48-44 86-46 40-2 66 14 86 38l80 10c30 4 52 22 56 56"/>
+    <path d="M95 225h45M232 225h136M460 225h47"/>
+    <circle cx="186" cy="226" r="40"/><circle cx="186" cy="226" r="14"/>
+    <circle cx="414" cy="226" r="40"/><circle cx="414" cy="226" r="14"/>
+    <path d="M232 168l26-30h70l26 30"/>
+    <path d="M300 138v30"/>
+  </g>
+  <text x="300" y="305" text-anchor="middle" font-family="Courier New, monospace" font-size="20" fill="#efe4cc" fill-opacity=".45" letter-spacing="4">PHOTO À VENIR</text>
+</svg>

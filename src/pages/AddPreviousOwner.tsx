@@ -54,11 +54,11 @@ const AddPreviousOwner: React.FC = () => {
       >
         <ArrowLeft size={20} className="mr-1" /> Retour à la liste des propriétaires
       </button>
-      <h1 className="text-2xl font-bold mb-6 text-primary">Ajouter un Ancien Propriétaire</h1>
+      <h1 className="titre-page">Ajouter un Ancien Propriétaire</h1>
 
-      {error && <div className="text-danger mb-4">{error}</div>}
+      {error && <div className="text-rouille mb-4">{error}</div>}
 
-      <form onSubmit={handleSubmit} className="bg-secondary p-6 rounded-md shadow-md">
+      <form onSubmit={handleSubmit} className="panneau p-6 rounded-md">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-light text-sm font-bold mb-2" htmlFor="name">
@@ -70,12 +70,12 @@ const AddPreviousOwner: React.FC = () => {
               name="name"
               value={formData.name}
               onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-none focus:shadow-outline"
+              className="input w-full"
             />
           </div>
           <div>
             <label className="block text-light text-sm font-bold mb-2" htmlFor="startDate">
-              Date d'achat <span className="text-red-500">*</span>
+              Date d'achat <span className="text-rouille">*</span>
             </label>
             <input
               type="date"
@@ -83,7 +83,7 @@ const AddPreviousOwner: React.FC = () => {
               name="startDate"
               value={formData.startDate}
               onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-none focus:shadow-outline"
+              className="input w-full"
               required
             />
           </div>
@@ -97,7 +97,7 @@ const AddPreviousOwner: React.FC = () => {
               name="endDate"
               value={formData.endDate}
               onChange={handleInputChange}
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-dark leading-tight focus:outline-none focus:shadow-outline"
+              className="input w-full"
             />
           </div>
         </div>
@@ -105,14 +105,14 @@ const AddPreviousOwner: React.FC = () => {
           <button
             type="button"
             onClick={() => navigate(`/vehicle/${vehicleId}/previous-owners`)}
-            className="bg-gray-500 text-light px-4 py-2 rounded-md mr-2 hover:bg-gray-600 transition-colors duration-200"
+            className="bg-white/10 text-light px-4 py-2 rounded-md mr-2 hover:bg-white/20 transition-colors duration-200"
             disabled={loading}
           >
             Annuler
           </button>
           <button
             type="submit"
-            className="bg-primary text-dark px-4 py-2 rounded-md hover:bg-primary-dark transition-colors duration-200"
+            className="bg-primary text-dark px-4 py-2 rounded-md transition-colors duration-200"
             disabled={loading}
           >
             {loading ? 'Ajout en cours...' : 'Ajouter'}

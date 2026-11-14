@@ -1,12 +1,11 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Layout from './components/Layout';
 import Connexion from './components/Connexion';
 import VehicleList from './pages/VehicleList';
 import VehicleDetail from './pages/VehicleDetail';
 import AddVehicle from './pages/AddVehicle';
 import AddMaintenance from './pages/AddMaintenance';
-import Stats from './pages/Stats';
 import EditVehicle from './pages/EditVehicle';
 import EditMaintenance from './pages/EditMaintenance';
 import ControleTechnique from './pages/ControleTechnique'; // This is likely the Add CT page
@@ -16,7 +15,11 @@ import EditControleTechnique from './pages/EditControleTechnique';
 import AddPreviousOwner from './pages/AddPreviousOwner';
 import EditPreviousOwner from './pages/EditPreviousOwner';
 import Suivi from './pages/Suivi'; // Import the Suivi page
-import Alerts from './pages/Alerts'; // Import the new Alerts page
+import Alerts from './pages/Alerts';
+import Chargement from './components/Chargement';
+
+// Chart.js n'est chargé qu'à l'ouverture des statistiques
+const Stats = lazy(() => import('./pages/Stats'));
 
 
 function App() {
@@ -29,7 +32,7 @@ function App() {
           <Route path="add-vehicle" element={<AddVehicle />} />
           <Route path="vehicle/:vehicleId" element={<VehicleDetail />} />
           <Route path="vehicle/:vehicleId/add-maintenance" element={<AddMaintenance />} />
-          <Route path="stats" element={<Stats />} />
+          <Route path="stats" element={<Suspense fallback={<Chargement />}><Stats /></Suspense>} />
           <Route path="edit-vehicle/:id" element={<EditVehicle />} />
           <Route path="vehicle/:vehicleId/edit-maintenance/:entryId" element={<EditMaintenance />} />
           <Route path="vehicle/:vehicleId/add-controle-technique" element={<ControleTechnique />} />
@@ -39,7 +42,8 @@ function App() {
           <Route path="vehicle/:vehicleId/add-previous-owner" element={<AddPreviousOwner />} />
           <Route path="vehicle/:vehicleId/edit-previous-owner/:entryId" element={<EditPreviousOwner />} />
           <Route path="suivi" element={<Suivi />} /> {/* Suivi route */}
-          <Route path="alerts" element={<Alerts />} /> {/* Add the new Alerts route */}
+          <Route path="alerts" element={<Alerts />} />
+          <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
     </Router>

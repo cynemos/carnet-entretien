@@ -1,83 +1,91 @@
 import React, { useEffect, useState } from 'react';
-import { Link, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Car, PlusCircle, BarChart2, ListChecks, AlertTriangle, LogOut, Menu, X } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { getVehicles } from '../utils/donnees';
+import { compterAlertesActives } from '../utils/alertes';
+import Embleme from './Embleme';
 
-// Define props for Layout, including the new hasUnreadAlerts prop
-interface LayoutProps {
-  hasUnreadAlerts?: boolean; // Optional prop to indicate unread alerts
-}
+const LIENS = [
+  { to: '/', label: 'Ma flotte', icone: Car, fin: true },
+  { to: '/add-vehicle', label: 'Ajouter un véhicule', icone: PlusCircle },
+  { to: '/stats', label: 'Statistiques', icone: BarChart2 },
+  { to: '/suivi', label: 'Suivi', icone: ListChecks },
+  { to: '/alerts', label: 'Alertes', icone: AlertTriangle, badge: true },
+];
 
-// Update the component signature to accept props
-const Layout: React.FC<LayoutProps> = ({ hasUnreadAlerts = false }) => { // Default to false if not provided
+// Enseigne émaillée de l'atelier
+const Enseigne: React.FC<{ compacte?: boolean }> = ({ compacte }) => (
+  <Link to="/" className="flex items-center gap-3 group">
+    <Embleme taille={compacte ? 36 : 56} className="drop-shadow-[0_3px_6px_rgba(0,0,0,0.6)] transition-transform duration-500 group-hover:rotate-[20deg]" />
+    <span className="leading-none">
+      <span className={`block font-display text-primary ${compacte ? 'text-base' : 'text-xl'}`} style={{ textShadow: '0 2px 0 #000' }}>
+        Carnets
+      </span>
+      <span className={`block font-titre uppercase tracking-[0.25em] text-light/70 ${compacte ? 'text-[0.6rem]' : 'text-[0.7rem] mt-1'}`}>
+        d'entretien
+      </span>
+    </span>
+  </Link>
+);
+
+const Layout: React.FC = () => {
   // Téléphone : la barre latérale devient un menu escamotable, refermé à chaque changement de page
   const [menuOuvert, setMenuOuvert] = useState(false);
+  const [nbAlertes, setNbAlertes] = useState(0);
   const { pathname } = useLocation();
   useEffect(() => setMenuOuvert(false), [pathname]);
 
+  // Badge des alertes, recalculé à chaque page (la flotte est petite)
+  useEffect(() => {
+    getVehicles().then(v => setNbAlertes(compterAlertesActives(v))).catch(() => setNbAlertes(0));
+  }, [pathname]);
+
   return (
-    <div className="flex min-h-screen bg-dark text-light">
+    <div className="flex min-h-screen text-light">
       {/* Bandeau du haut, téléphone uniquement */}
-      <header className="md:hidden fixed top-0 inset-x-0 z-30 h-14 flex items-center justify-between px-4 bg-secondary border-b border-primary/30">
-        <Link to="/" className="flex items-center">
-          <Car size={26} color="#FF4500" className="mr-2" />
-          <span className="text-lg font-bold text-primary">Carnets d'entretien</span>
-        </Link>
+      <header className="md:hidden fixed top-0 inset-x-0 z-30 h-16 flex items-center justify-between px-4 bg-secondary/95 backdrop-blur border-b-2 border-primary/60 shadow-lg">
+        <Enseigne compacte />
         <button type="button" onClick={() => setMenuOuvert(o => !o)} aria-label={menuOuvert ? 'Fermer le menu' : 'Ouvrir le menu'}
-          aria-expanded={menuOuvert} className="p-2 -mr-2 text-light hover:text-primary">
-          {menuOuvert ? <X size={26} /> : <Menu size={26} />}
+          aria-expanded={menuOuvert} className="relative p-2 -mr-2 text-light hover:text-primary">
+          {menuOuvert ? <X size={28} /> : <Menu size={28} />}
+          {!menuOuvert && nbAlertes > 0 && <span className="absolute top-1 right-0 h-2.5 w-2.5 rounded-full bg-rouille ring-2 ring-secondary" />}
         </button>
       </header>
       {menuOuvert && (
-        <div className="md:hidden fixed inset-0 z-30 bg-black/60" onClick={() => setMenuOuvert(false)} aria-hidden="true" />
+        <div className="md:hidden fixed inset-0 z-30 bg-black/70" onClick={() => setMenuOuvert(false)} aria-hidden="true" />
       )}
 
-      {/* Sidebar : fixe sur ordinateur, tiroir sur téléphone */}
-      <aside className={`w-64 bg-secondary p-6 flex flex-col fixed inset-y-0 left-0 z-40 transform transition-transform duration-200 md:static md:translate-x-0 md:z-auto ${menuOuvert ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center mb-8">
-          <Car size={32} color="#FF4500" className="mr-2" />
-          <h1 className="text-xl font-bold text-primary">Carnets d'entretien</h1>
-        </div>
-        <nav className="flex flex-col space-y-4">
-          <Link to="/" className="flex items-center text-light hover:text-primary transition-colors duration-200">
-            <Car size={20} className="mr-2" />
-            Véhicules
-          </Link>
-          <Link to="/add-vehicle" className="flex items-center text-light hover:text-primary transition-colors duration-200">
-            <PlusCircle size={20} className="mr-2" />
-            Ajouter Véhicule
-          </Link>
-          <Link to="/stats" className="flex items-center text-light hover:text-primary transition-colors duration-200">
-            <BarChart2 size={20} className="mr-2" />
-            Statistiques
-          </Link>
-          {/* Link to Suivi */}
-          <Link to="/suivi" className="flex items-center text-light hover:text-primary transition-colors duration-200">
-            <ListChecks size={20} className="mr-2" />
-            Suivi
-          </Link>
-           {/* Link to Alerts */}
-          <Link to="/alerts" className="flex items-center text-light hover:text-primary transition-colors duration-200 relative"> {/* Added relative positioning */}
-            <AlertTriangle size={20} className="mr-2" />
-            Alertes
-            {/* Conditional indicator */}
-            {hasUnreadAlerts && (
-              <span className="absolute top-0 right-0 block h-2 w-2 rounded-full ring-2 ring-secondary bg-red-500"></span> // Added absolute positioning and styling
-            )}
-          </Link>
+      {/* Barre latérale : fixe sur ordinateur, tiroir sur téléphone */}
+      <aside className={`barre-atelier w-72 md:w-64 p-6 flex flex-col fixed inset-y-0 left-0 z-40 transform transition-transform duration-300 md:sticky md:top-0 md:h-screen md:translate-x-0 md:z-auto ${menuOuvert ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="mb-10"><Enseigne /></div>
+        <nav className="flex flex-col gap-1.5">
+          {LIENS.map(({ to, label, icone: Icone, fin, badge }) => (
+            <NavLink key={to} to={to} end={fin}
+              className={({ isActive }) => `relative flex items-center gap-3 px-3 py-2.5 rounded-md font-titre uppercase tracking-wider text-sm transition-all duration-200 ${isActive
+                ? 'bg-black/40 text-primary shadow-[inset_0_2px_6px_rgba(0,0,0,0.6)] before:absolute before:left-0 before:top-2 before:bottom-2 before:w-1 before:rounded-r before:bg-primary'
+                : 'text-light/80 hover:text-light hover:bg-white/5 hover:translate-x-1'}`}>
+              <Icone size={19} />
+              <span className="flex-1">{label}</span>
+              {badge && nbAlertes > 0 && (
+                <span className="min-w-[1.4rem] h-[1.4rem] px-1 rounded-full bg-rouille text-light text-xs font-bold flex items-center justify-center shadow">
+                  {nbAlertes}
+                </span>
+              )}
+            </NavLink>
+          ))}
         </nav>
-        <div className="mt-auto pt-8 flex items-center justify-between text-sm text-gray-400">
+        <div className="mt-auto pt-6 border-t border-primary/20 flex items-center justify-between text-sm text-light/50">
           <button type="button" onClick={() => supabase.auth.signOut()}
-            className="flex items-center hover:text-primary transition-colors duration-200">
-            <LogOut size={16} className="mr-2" />
+            className="flex items-center gap-2 hover:text-primary transition-colors duration-200">
+            <LogOut size={16} />
             Déconnexion
           </button>
-          <span>v{__APP_VERSION__}</span>
+          <span className="font-machine">v{__APP_VERSION__}</span>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 min-w-0 px-4 pb-6 pt-20 md:p-8 overflow-y-auto bg-dark bg-racing-stripes bg-repeat">
+      <main className="flex-1 min-w-0 px-4 pb-10 pt-24 md:px-10 md:py-10">
         <Outlet />
       </main>
     </div>

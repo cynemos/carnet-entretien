@@ -48,8 +48,8 @@ const AddVehicle: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Ajouter un nouveau véhicule</h2>
-      <form onSubmit={handleSubmit} className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 space-y-4">
+      <h2 className="titre-page">Ajouter un nouveau véhicule</h2>
+      <form onSubmit={handleSubmit} className="panneau rounded-lg p-4 md:p-6 border border-primary/30 space-y-4">
         <div>
           <label htmlFor="type" className="block text-light/80 text-sm font-medium mb-1">Type</label>
           <select
@@ -196,10 +196,10 @@ const AddVehicle: React.FC = () => {
             placeholder="Ex: AB-123-CD"
           />
         </div>
-         {error && <p className="text-red-500 text-sm">{error}</p>}
+         {error && <p className="text-rouille text-sm">{error}</p>}
         <button
           type="submit"
-          className="w-full bg-primary text-secondary font-bold py-2 px-4 rounded-md hover:bg-orange-600 transition-colors duration-200 disabled:opacity-50"
+          className="w-full bg-primary text-secondary font-bold py-2 px-4 rounded-md transition-colors duration-200 disabled:opacity-50"
           disabled={loading}
         >
           {loading ? 'Ajout en cours...' : 'Ajouter le véhicule'}

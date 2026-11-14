@@ -4,6 +4,7 @@
 import { supabase } from '../lib/supabase';
 import { Vehicle, MaintenanceEntry, ControleTechniqueEntry, PreviousOwner } from '../types';
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- lignes brutes renvoyées par PostgREST
 type Ligne = Record<string, any>;
 
 const SELECTION = '*, maintenance_entries(*), controle_technique_entries(*), previous_owners(*)';

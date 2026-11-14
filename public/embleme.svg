@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="l" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f1c97a"/><stop offset=".5" stop-color="#d4943a"/><stop offset="1" stop-color="#8a5a22"/></linearGradient>
+  </defs>
+  <circle cx="32" cy="32" r="31" fill="url(#l)"/>
+  <circle cx="32" cy="32" r="26" fill="#22170f"/>
+  <g fill="url(#l)" transform="translate(32 22)">
+    <rect x="-2" y="-9" width="4" height="5" transform="rotate(0)"/><rect x="-2" y="-9" width="4" height="5" transform="rotate(45)"/>
+    <rect x="-2" y="-9" width="4" height="5" transform="rotate(90)"/><rect x="-2" y="-9" width="4" height="5" transform="rotate(135)"/>
+    <rect x="-2" y="-9" width="4" height="5" transform="rotate(180)"/><rect x="-2" y="-9" width="4" height="5" transform="rotate(225)"/>
+    <rect x="-2" y="-9" width="4" height="5" transform="rotate(270)"/><rect x="-2" y="-9" width="4" height="5" transform="rotate(315)"/>
+    <circle r="6"/><circle r="2.4" fill="#22170f"/>
+  </g>
+  <g fill="#efe4cc">
+    <rect x="30" y="29" width="4" height="22" rx="2" transform="rotate(40 32 40)"/>
+    <rect x="30" y="29" width="4" height="22" rx="2" transform="rotate(-40 32 40)"/>
+  </g>
+</svg>

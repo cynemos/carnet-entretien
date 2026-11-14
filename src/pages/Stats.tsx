@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- rappels Chart.js typés de façon lâche */
 import React, { useEffect, useState } from 'react';
-import { Vehicle, MaintenanceEntry, ControleTechniqueEntry } from '../types';
+import { Vehicle } from '../types';
 import { getVehicles } from '../utils/donnees';
 import { Bar, Doughnut, Line } from 'react-chartjs-2'; // Import Line
 import {
@@ -15,6 +16,7 @@ import {
   PointElement, // Import PointElement
   TimeScale, // Import TimeScale for date axis
 } from 'chart.js';
+import Chargement from '../components/Chargement';
 import 'chartjs-adapter-date-fns'; // Import date adapter
 
 // Register Chart.js components
@@ -30,6 +32,10 @@ ChartJS.register(
   PointElement, // Register PointElement
   TimeScale // Register TimeScale
 );
+
+// Lettrage des graphiques assorti au thème atelier
+ChartJS.defaults.font.family = 'Oswald, sans-serif';
+ChartJS.defaults.color = '#efe4cc';
 
 const Stats: React.FC = () => {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
@@ -65,8 +71,8 @@ const Stats: React.FC = () => {
         data: vehicles.map(v =>
           v.maintenanceHistory.reduce((sum, entry) => sum + entry.totalCost, 0)
         ),
-        backgroundColor: 'rgba(255, 159, 64, 0.6)', // Primary color
-        borderColor: 'rgba(255, 159, 64, 1)',
+        backgroundColor: 'rgba(212, 148, 58, 0.6)', // Primary color
+        borderColor: 'rgba(212, 148, 58, 1)',
         borderWidth: 1,
       },
     ],
@@ -78,13 +84,13 @@ const Stats: React.FC = () => {
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#E0E0E0', // Light text for legend
+          color: '#efe4cc', // Light text for legend
         },
       },
       title: {
         display: true,
         text: 'Coût Total d\'Entretien par Véhicule',
-        color: '#E0E0E0', // Light text for title
+        color: '#efe4cc', // Light text for title
       },
       tooltip: {
          callbacks: {
@@ -104,21 +110,21 @@ const Stats: React.FC = () => {
     scales: {
       x: {
         ticks: {
-          color: '#B0B0B0', // Lighter text for x-axis
+          color: '#bfae8f', // Lighter text for x-axis
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)', // Subtle grid lines
+          color: 'rgba(212, 148, 58, 0.12)', // Subtle grid lines
         },
       },
       y: {
         ticks: {
-          color: '#B0B0B0', // Lighter text for y-axis
+          color: '#bfae8f', // Lighter text for y-axis
            callback: function(value: any) {
               return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR' }).format(value);
            }
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)', // Subtle grid lines
+          color: 'rgba(212, 148, 58, 0.12)', // Subtle grid lines
         },
       },
     },
@@ -131,8 +137,8 @@ const Stats: React.FC = () => {
       {
         label: 'Nombre d\'Entretiens',
         data: vehicles.map(v => v.maintenanceHistory.length),
-        backgroundColor: 'rgba(99, 132, 255, 0.6)', // Accent color
-        borderColor: 'rgba(99, 132, 255, 1)',
+        backgroundColor: 'rgba(143, 191, 159, 0.6)', // Accent color
+        borderColor: 'rgba(143, 191, 159, 1)',
         borderWidth: 1,
       },
     ],
@@ -144,31 +150,31 @@ const Stats: React.FC = () => {
       legend: {
         position: 'top' as const,
          labels: {
-          color: '#E0E0E0', // Light text for legend
+          color: '#efe4cc', // Light text for legend
         },
       },
       title: {
         display: true,
         text: 'Nombre d\'Entretiens par Véhicule',
-        color: '#E0E0E0', // Light text for title
+        color: '#efe4cc', // Light text for title
       },
     },
      scales: {
       x: {
         ticks: {
-          color: '#B0B0B0', // Lighter text for x-axis
+          color: '#bfae8f', // Lighter text for x-axis
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)', // Subtle grid lines
+          color: 'rgba(212, 148, 58, 0.12)', // Subtle grid lines
         },
       },
       y: {
         ticks: {
-          color: '#B0B0B0', // Lighter text for y-axis
+          color: '#bfae8f', // Lighter text for y-axis
            stepSize: 1, // Ensure integer ticks for count
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)', // Subtle grid lines
+          color: 'rgba(212, 148, 58, 0.12)', // Subtle grid lines
         },
       },
     },
@@ -231,34 +237,34 @@ const Stats: React.FC = () => {
         label: 'Coût Total par Type d\'Entretien (€)',
         data: filteredCosts, // Use filtered data
         backgroundColor: [
-          'rgba(255, 99, 132, 0.6)', // Red
-          'rgba(54, 162, 235, 0.6)', // Blue
-          'rgba(255, 206, 86, 0.6)', // Yellow
-          'rgba(75, 192, 192, 0.6)', // Green
-          'rgba(153, 102, 255, 0.6)', // Purple
-          'rgba(255, 159, 64, 0.6)', // Orange
-          'rgba(201, 203, 207, 0.6)', // Grey
-          'rgba(100, 149, 237, 0.6)', // Cornflower Blue
-          'rgba(218, 112, 214, 0.6)', // Orchid
-          'rgba(144, 238, 144, 0.6)', // Light Green
-          'rgba(240, 128, 128, 0.6)', // Light Coral
-          'rgba(173, 216, 230, 0.6)', // Light Blue
-          'rgba(128, 128, 128, 0.6)', // Dark Grey (for 'Autre')
+          'rgba(194, 85, 58, 0.6)', // Red
+          'rgba(122, 167, 184, 0.6)', // Blue
+          'rgba(224, 184, 74, 0.6)', // Yellow
+          'rgba(111, 143, 114, 0.6)', // Green
+          'rgba(142, 59, 70, 0.6)', // Purple
+          'rgba(212, 148, 58, 0.6)', // Orange
+          'rgba(239, 228, 204, 0.6)', // Grey
+          'rgba(107, 122, 128, 0.6)', // Cornflower Blue
+          'rgba(184, 115, 74, 0.6)', // Orchid
+          'rgba(163, 163, 90, 0.6)', // Light Green
+          'rgba(200, 162, 122, 0.6)', // Light Coral
+          'rgba(150, 180, 170, 0.6)', // Light Blue
+          'rgba(122, 111, 99, 0.6)', // Dark Grey (for 'Autre')
         ],
         borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(54, 162, 235, 1)',
-          'rgba(255, 206, 86, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
-          'rgba(201, 203, 207, 1)',
-          'rgba(100, 149, 237, 1)',
-          'rgba(218, 112, 214, 1)',
-          'rgba(144, 238, 144, 1)',
-          'rgba(240, 128, 128, 1)',
-          'rgba(173, 216, 230, 1)',
-          'rgba(128, 128, 128, 1)',
+          'rgba(194, 85, 58, 1)',
+          'rgba(122, 167, 184, 1)',
+          'rgba(224, 184, 74, 1)',
+          'rgba(111, 143, 114, 1)',
+          'rgba(142, 59, 70, 1)',
+          'rgba(212, 148, 58, 1)',
+          'rgba(239, 228, 204, 1)',
+          'rgba(107, 122, 128, 1)',
+          'rgba(184, 115, 74, 1)',
+          'rgba(163, 163, 90, 1)',
+          'rgba(200, 162, 122, 1)',
+          'rgba(150, 180, 170, 1)',
+          'rgba(122, 111, 99, 1)',
         ],
         borderWidth: 1,
       },
@@ -271,13 +277,13 @@ const Stats: React.FC = () => {
       legend: {
         position: 'top' as const,
          labels: {
-          color: '#E0E0E0', // Light text for legend
+          color: '#efe4cc', // Light text for legend
         },
       },
       title: {
         display: true,
         text: 'Répartition des Coûts par Type d\'Entretien (Estimation)',
-        color: '#E0E0E0', // Light text for title
+        color: '#efe4cc', // Light text for title
       },
        tooltip: {
          callbacks: {
@@ -321,13 +327,13 @@ const Stats: React.FC = () => {
 
       // Define colors (use a simple palette or generate dynamically)
       const colors = [
-        'rgba(255, 99, 132, 1)', // Red
-        'rgba(54, 162, 235, 1)', // Blue
-        'rgba(255, 206, 86, 1)', // Yellow
-        'rgba(75, 192, 192, 1)', // Green
-        'rgba(153, 102, 255, 1)', // Purple
-        'rgba(255, 159, 64, 1)', // Orange
-        'rgba(201, 203, 207, 1)', // Grey
+        'rgba(194, 85, 58, 1)', // Red
+        'rgba(122, 167, 184, 1)', // Blue
+        'rgba(224, 184, 74, 1)', // Yellow
+        'rgba(111, 143, 114, 1)', // Green
+        'rgba(142, 59, 70, 1)', // Purple
+        'rgba(212, 148, 58, 1)', // Orange
+        'rgba(239, 228, 204, 1)', // Grey
       ];
       const color = colors[index % colors.length];
 
@@ -350,13 +356,13 @@ const Stats: React.FC = () => {
       legend: {
         position: 'top' as const,
         labels: {
-          color: '#E0E0E0', // Light text for legend
+          color: '#efe4cc', // Light text for legend
         },
       },
       title: {
         display: true,
         text: 'Évolution du Kilométrage par Véhicule',
-        color: '#E0E0E0', // Light text for title
+        color: '#efe4cc', // Light text for title
       },
       tooltip: {
         callbacks: {
@@ -394,7 +400,7 @@ const Stats: React.FC = () => {
       x: {
         type: 'time' as const, // Use time scale for dates
         time: {
-          unit: 'year', // Display ticks by year initially
+          unit: 'year' as const, // Display ticks by year initially
           tooltipFormat: 'dd/MM/yyyy', // Format date in tooltip
           displayFormats: {
             year: 'yyyy',
@@ -403,26 +409,26 @@ const Stats: React.FC = () => {
           },
         },
         ticks: {
-          color: '#B0B0B0', // Lighter text for x-axis
+          color: '#bfae8f', // Lighter text for x-axis
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)', // Subtle grid lines
+          color: 'rgba(212, 148, 58, 0.12)', // Subtle grid lines
         },
       },
       y: {
         title: {
             display: true,
             text: 'Kilométrage (km)',
-            color: '#E0E0E0',
+            color: '#efe4cc',
         },
         ticks: {
-          color: '#B0B0B0', // Lighter text for y-axis
+          color: '#bfae8f', // Lighter text for y-axis
            callback: function(value: any) {
               return value.toLocaleString('fr-FR') + ' km'; // Format mileage
            }
         },
         grid: {
-          color: 'rgba(255, 255, 255, 0.1)', // Subtle grid lines
+          color: 'rgba(212, 148, 58, 0.12)', // Subtle grid lines
         },
       },
     },
@@ -430,11 +436,11 @@ const Stats: React.FC = () => {
 
 
   if (loading) {
-    return <div className="text-center text-light">Chargement des statistiques...</div>;
+    return <Chargement texte="Chargement des statistiques…" />;
   }
 
   if (error) {
-    return <div className="text-center text-red-500">{error}</div>;
+    return <div className="text-center text-rouille">{error}</div>;
   }
 
   if (vehicles.length === 0) {
@@ -443,28 +449,28 @@ const Stats: React.FC = () => {
 
   return (
     <div className="container mx-auto">
-      <h2 className="text-2xl md:text-3xl font-bold text-primary mb-6">Statistiques de la Flotte</h2>
+      <h2 className="titre-page">Statistiques de la Flotte</h2>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Mileage Evolution Chart */}
-        <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 lg:col-span-2"> {/* Make it span full width */}
+        <div className="panneau rounded-lg p-4 md:p-6 border border-primary/30 lg:col-span-2"> {/* Make it span full width */}
            <Line data={mileageEvolutionData} options={mileageEvolutionOptions} />
         </div>
 
         {/* Total Cost per Vehicle Chart */}
-        <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
+        <div className="panneau rounded-lg p-4 md:p-6 border border-primary/30">
           <Bar data={totalCostPerVehicleData} options={totalCostPerVehicleOptions} />
         </div>
 
         {/* Maintenance Entry Count per Vehicle Chart */}
-        <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30">
+        <div className="panneau rounded-lg p-4 md:p-6 border border-primary/30">
            <Bar data={entryCountPerVehicleData} options={entryCountPerVehicleOptions} />
         </div>
 
          {/* Total Cost by Maintenance Type Chart */}
          {/* Only show if there are costs categorized */}
          {filteredCosts.length > 0 && (
-           <div className="bg-secondary rounded-lg shadow-lg p-4 md:p-6 border border-primary/30 lg:col-span-2 flex justify-center">
+           <div className="panneau rounded-lg p-4 md:p-6 border border-primary/30 lg:col-span-2 flex justify-center">
              {/* Doughnut chart might look better centered or in a smaller container */}
              <div className="w-full max-w-md"> {/* Limit width for Doughnut */}
                <Doughnut data={totalCostByTypeData} options={totalCostByTypeOptions} />
