@@ -139,5 +139,5 @@ Tâches planifiées (`crontab -e`, utilisateur cynemos) :
 - **1.1** : migration vers Supabase auto-hébergé, connexion obligatoire.
 - **1.2** : affichage adapté au téléphone.
 - **1.3** : thème « atelier de restauration vintage » et calcul des alertes corrigé ; mises à jour de sécurité des dépendances.
-- **1.5** : bilan achat / vente, catégories, frais annexes, travaux à faire, fiche technique, galerie, recherche, partage en lecture seule, restauration JSON, nouvelles statistiques.
 - **1.4** : kilométrage relevé, échéances par véhicule, statut vendu, fichiers sur le serveur, rappels ntfy, appli installable, exports JSON/CSV, nouveau PDF.
+- **1.5** : bilan achat / vente, catégories, frais annexes, travaux à faire, fiche technique, galerie, recherche, partage en lecture seule, restauration JSON, nouvelles statistiques.
