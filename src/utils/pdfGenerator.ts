@@ -169,9 +169,10 @@ export const generateVehicleHistoryPdf = (vehicle: Vehicle) => {
     doc.setFont('courier', 'normal');
     doc.setFontSize(10.5);
     couleur(ENCRE, 'texte');
-    doc.text(doc.splitTextToSize(v, colonneW - 6)[0], x, y + 5);
+    // Deux lignes au plus (la dernière case, « Échéances », est la seule à pouvoir déborder)
+    doc.text((doc.splitTextToSize(v, colonneW - 6) as string[]).slice(0, 2), x, y + 5);
   });
-  y += 18;
+  y += 22;
 
   // Entretiens
   const entretiens = [...vehicle.maintenanceHistory].sort((a, b) => a.date.localeCompare(b.date));
