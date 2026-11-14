@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Vehicle } from '../types';
 import Chargement from '../components/Chargement';
+import ChampsSuivi from '../components/ChampsSuivi';
+import { ChampFichier } from '../components/Fichiers';
 import { getVehicleById, updateVehicle } from '../utils/donnees';
 
 const EditVehicle: React.FC = () => {
@@ -33,6 +35,13 @@ const EditVehicle: React.FC = () => {
               imageUrl: existingVehicle.imageUrl || '',
               carteGriseGoogleDriveLink: existingVehicle.carteGriseGoogleDriveLink || '',
               licensePlate: existingVehicle.licensePlate || '', // Include new field
+              currentMileage: existingVehicle.currentMileage,
+              ctIntervalYears: existingVehicle.ctIntervalYears,
+              maintenanceIntervalMonths: existingVehicle.maintenanceIntervalMonths,
+              maintenanceIntervalKm: existingVehicle.maintenanceIntervalKm,
+              soldDate: existingVehicle.soldDate,
+              photoPath: existingVehicle.photoPath,
+              carteGrisePath: existingVehicle.carteGrisePath,
             });
           } else {
             setError("Véhicule non trouvé.");
@@ -106,7 +115,7 @@ const EditVehicle: React.FC = () => {
             value={vehicleData.type}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           >
             <option value="">Sélectionner un type</option>
             <option value="Car">Voiture</option>
@@ -126,7 +135,7 @@ const EditVehicle: React.FC = () => {
             value={vehicleData.make}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           />
         </div>
         <div>
@@ -138,7 +147,7 @@ const EditVehicle: React.FC = () => {
             value={vehicleData.model}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -153,7 +162,7 @@ const EditVehicle: React.FC = () => {
               required
               min="1900"
               max={new Date().getFullYear()}
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
           <div>
@@ -166,7 +175,7 @@ const EditVehicle: React.FC = () => {
               onChange={handleChange}
               required
               min="0"
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
         </div>
@@ -180,7 +189,7 @@ const EditVehicle: React.FC = () => {
               value={vehicleData.purchaseDate}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
           <div>
@@ -191,7 +200,7 @@ const EditVehicle: React.FC = () => {
               name="firstRegistrationDate"
               value={vehicleData.firstRegistrationDate || ''}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
         </div>
@@ -203,7 +212,7 @@ const EditVehicle: React.FC = () => {
             name="vin"
             value={vehicleData.vin || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           />
         </div>
         <div>
@@ -214,7 +223,7 @@ const EditVehicle: React.FC = () => {
             name="imageUrl"
             value={vehicleData.imageUrl || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
             placeholder="Ex: https://unsplash.com/photos/..."
           />
         </div>
@@ -227,7 +236,7 @@ const EditVehicle: React.FC = () => {
             name="carteGriseGoogleDriveLink"
             value={vehicleData.carteGriseGoogleDriveLink || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
             placeholder="Ex: https://drive.google.com/file/d/..."
           />
         </div>
@@ -240,10 +249,19 @@ const EditVehicle: React.FC = () => {
             name="licensePlate"
             value={vehicleData.licensePlate || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
             placeholder="Ex: AB-123-CD"
           />
         </div>
+        {id && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <ChampFichier vehicleId={id} libelle="Photo du véhicule" accept="image/*" chemin={vehicleData.photoPath}
+              onChange={c => setVehicleData(prev => prev && { ...prev, photoPath: c })} />
+            <ChampFichier vehicleId={id} libelle="Carte grise (photo ou PDF)" chemin={vehicleData.carteGrisePath}
+              onChange={c => setVehicleData(prev => prev && { ...prev, carteGrisePath: c })} />
+          </div>
+        )}
+        <ChampsSuivi valeur={vehicleData} onChange={v => setVehicleData(prev => prev && { ...prev, ...v })} />
         {error && <p className="text-rouille text-sm">{error}</p>}
         <button
           type="submit"

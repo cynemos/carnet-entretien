@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addVehicle } from '../utils/donnees';
 import { Vehicle } from '../types';
+import ChampsSuivi, { SUIVI_PAR_DEFAUT } from '../components/ChampsSuivi';
 
 const AddVehicle: React.FC = () => {
   const navigate = useNavigate();
@@ -17,6 +18,7 @@ const AddVehicle: React.FC = () => {
     imageUrl: '',
     carteGriseGoogleDriveLink: '',
     licensePlate: '', // Initialize new field
+    ...SUIVI_PAR_DEFAUT,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -36,8 +38,8 @@ const AddVehicle: React.FC = () => {
     setError(null);
     try {
       // No need to generate ID or add history arrays here, firebaseData handles it
-      await addVehicle(vehicleData);
-      navigate('/'); // Navigate back to the list after adding
+      const id = await addVehicle(vehicleData);
+      navigate(`/vehicle/${id}`); // la fiche permet ensuite d'ajouter photo et carte grise
     } catch (err) {
       console.error("Error adding vehicle:", err);
       setError("Erreur lors de l'ajout du véhicule.");
@@ -58,7 +60,7 @@ const AddVehicle: React.FC = () => {
             value={vehicleData.type}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           >
             <option value="">Sélectionner un type</option>
             <option value="Car">Voiture</option>
@@ -78,7 +80,7 @@ const AddVehicle: React.FC = () => {
             value={vehicleData.make}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           />
         </div>
         <div>
@@ -90,7 +92,7 @@ const AddVehicle: React.FC = () => {
             value={vehicleData.model}
             onChange={handleChange}
             required
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -105,7 +107,7 @@ const AddVehicle: React.FC = () => {
               required
               min="1900"
               max={new Date().getFullYear()}
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
           <div>
@@ -118,7 +120,7 @@ const AddVehicle: React.FC = () => {
               onChange={handleChange}
               required
               min="0"
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
         </div>
@@ -132,7 +134,7 @@ const AddVehicle: React.FC = () => {
               value={vehicleData.purchaseDate}
               onChange={handleChange}
               required
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
           <div>
@@ -143,7 +145,7 @@ const AddVehicle: React.FC = () => {
               name="firstRegistrationDate"
               value={vehicleData.firstRegistrationDate || ''}
               onChange={handleChange}
-              className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+              className="input w-full"
             />
           </div>
         </div>
@@ -155,7 +157,7 @@ const AddVehicle: React.FC = () => {
             name="vin"
             value={vehicleData.vin || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
           />
         </div>
         <div>
@@ -166,7 +168,7 @@ const AddVehicle: React.FC = () => {
             name="imageUrl"
             value={vehicleData.imageUrl || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
             placeholder="Ex: https://unsplash.com/photos/..."
           />
         </div>
@@ -179,7 +181,7 @@ const AddVehicle: React.FC = () => {
             name="carteGriseGoogleDriveLink"
             value={vehicleData.carteGriseGoogleDriveLink || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
             placeholder="Ex: https://drive.google.com/file/d/..."
           />
         </div>
@@ -192,10 +194,12 @@ const AddVehicle: React.FC = () => {
             name="licensePlate"
             value={vehicleData.licensePlate || ''}
             onChange={handleChange}
-            className="w-full px-3 py-2 bg-dark border border-primary/30 rounded-md text-light focus:outline-none focus:ring-primary focus:border-primary"
+            className="input w-full"
             placeholder="Ex: AB-123-CD"
           />
         </div>
+        <ChampsSuivi valeur={vehicleData} onChange={v => setVehicleData(prev => ({ ...prev, ...v }))} />
+        <p className="text-light/60 text-sm font-machine">Photo et carte grise : à envoyer depuis « Modifier » une fois le véhicule créé.</p>
          {error && <p className="text-rouille text-sm">{error}</p>}
         <button
           type="submit"

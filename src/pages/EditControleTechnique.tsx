@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ChampFichier } from '../components/Fichiers';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { getVehicleById, updateControleTechniqueEntry } from '../utils/donnees';
@@ -23,6 +24,7 @@ const EditControleTechnique: React.FC = () => {
   const [exhaustEmissions, setExhaustEmissions] = useState('');
   const [headlights, setHeadlights] = useState('');
   const [googleDriveLink, setGoogleDriveLink] = useState(''); // State for Google Drive link
+  const [pvPath, setPvPath] = useState<string | undefined>();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -52,6 +54,7 @@ const EditControleTechnique: React.FC = () => {
             setExhaustEmissions(foundEntry.exhaustEmissions || '');
             setHeadlights(foundEntry.headlights || '');
             setGoogleDriveLink(foundEntry.googleDriveLink || ''); // Load existing link
+            setPvPath(foundEntry.pvPath);
           } else {
             setError("Contrôle Technique entry not found.");
           }
@@ -98,6 +101,7 @@ const EditControleTechnique: React.FC = () => {
       parkingBrake,
       exhaustEmissions,
       headlights,
+      pvPath,
       googleDriveLink: googleDriveLink || undefined, // Pass the updated Google Drive link state (will be converted to null in firebaseData)
       // reportUrl is not updated via file upload anymore
     };
@@ -257,6 +261,12 @@ const EditControleTechnique: React.FC = () => {
                )}
            </div>
         </div>
+
+        {vehicleId && (
+          <div className="mt-4">
+            <ChampFichier vehicleId={vehicleId} libelle="Procès-verbal (photo ou PDF)" chemin={pvPath} onChange={setPvPath} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <button

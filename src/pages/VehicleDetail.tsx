@@ -6,8 +6,9 @@ import { ArrowLeft, PlusCircle, Edit, Trash2, FileText, ExternalLink } from 'luc
 import { format, isValid } from 'date-fns'; // Import isValid
 import { fr } from 'date-fns/locale';
 import Chargement from '../components/Chargement';
-import sansPhoto from '../assets/sans-photo.svg';
-import { libelleType } from '../utils/alertes';
+import { PhotoVehicule, LienFichier } from '../components/Fichiers';
+import ReleveKm from '../components/ReleveKm';
+import { libelleType, kmActuel, estVendu } from '../utils/alertes';
 
 const VehicleDetail: React.FC = () => {
   const { vehicleId } = useParams<{ vehicleId: string }>();
@@ -122,8 +123,7 @@ const VehicleDetail: React.FC = () => {
     return <div className="container mx-auto text-center text-rouille">Véhicule introuvable.</div>;
   }
 
-  const kmActuels = Math.max(vehicle.initialMileage || 0, ...vehicle.maintenanceHistory.map(e => e.mileage || 0),
-    ...vehicle.controleTechniqueHistory.map(e => e.mileage || 0));
+  const kmActuels = kmActuel(vehicle);
   const dateFr = (d?: string) => d && isValid(new Date(d)) ? format(new Date(d), 'dd/MM/yyyy', { locale: fr }) : '—';
 
   return (
@@ -140,7 +140,10 @@ const VehicleDetail: React.FC = () => {
       <section className="panneau rounded-xl p-5 md:p-8 mb-8">
         <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,22rem)_1fr] gap-6 lg:gap-10 items-start">
           <div className="p-2 bg-[#efe4cc] rounded-sm shadow-[0_6px_16px_rgba(0,0,0,0.6)] rotate-[-1.2deg]">
-            <img src={vehicle.imageUrl || sansPhoto} alt={`${vehicle.make} ${vehicle.model}`} className="w-full h-56 object-cover sepia-[.35]" />
+            <div className="relative">
+              <PhotoVehicule vehicle={vehicle} className={`w-full h-56 object-cover ${estVendu(vehicle) ? 'grayscale' : 'sepia-[.35]'}`} />
+              {estVendu(vehicle) && <span className="tampon-vendu">Vendu</span>}
+            </div>
             <p className="font-machine text-[#3a2d20] text-center text-sm pt-2">{vehicle.make} {vehicle.model} — {vehicle.year}</p>
           </div>
           <div>
@@ -152,6 +155,7 @@ const VehicleDetail: React.FC = () => {
                 {String(kmActuels).padStart(6, '0').split('').map((c, i) => <span key={i}>{c}</span>)}
                 <span className="sep">km</span>
               </span>
+              {!estVendu(vehicle) && <ReleveKm vehicleId={vehicle.id} actuel={kmActuels} onEnregistre={fetchVehicle} />}
             </div>
             <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-3 text-light">
               {([
@@ -161,6 +165,8 @@ const VehicleDetail: React.FC = () => {
                 ['1re mise en circulation', dateFr(vehicle.firstRegistrationDate)],
                 ['N° de série (VIN)', vehicle.vin || '—'],
                 ['Entretiens enregistrés', String(vehicle.maintenanceHistory.length)],
+                ['Échéances', `CT tous les ${vehicle.ctIntervalYears} ans · entretien tous les ${vehicle.maintenanceIntervalMonths} mois${vehicle.maintenanceIntervalKm ? ` ou ${vehicle.maintenanceIntervalKm.toLocaleString('fr-FR')} km` : ''}`],
+                ...(vehicle.soldDate ? [['Vendu le', dateFr(vehicle.soldDate)] as const] : []),
               ] as const).map(([k, v]) => (
                 <div key={k} className="border-b border-dashed border-primary/20 pb-1.5">
                   <dt className="font-titre uppercase tracking-wider text-[0.7rem] text-primary/80">{k}</dt>
@@ -169,7 +175,11 @@ const VehicleDetail: React.FC = () => {
               ))}
             </dl>
             <div className="flex flex-wrap gap-3 mt-6">
-              {vehicle.carteGriseGoogleDriveLink && (
+              {vehicle.carteGrisePath && (
+                <LienFichier chemin={vehicle.carteGrisePath} libelle="Carte grise"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-accent/50 text-accent hover:bg-accent/10 font-titre uppercase tracking-wider text-sm" />
+              )}
+              {!vehicle.carteGrisePath && vehicle.carteGriseGoogleDriveLink && (
                 <a href={vehicle.carteGriseGoogleDriveLink} target="_blank" rel="noopener noreferrer"
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-md border border-accent/50 text-accent hover:bg-accent/10 font-titre uppercase tracking-wider text-sm">
                   Carte grise <ExternalLink size={16} />
@@ -230,7 +240,7 @@ const VehicleDetail: React.FC = () => {
                     <td className="py-2 px-4 border-b border-primary/30" data-label="Description">{entry.description}</td>
                     <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Coût Total">{entry.totalCost.toFixed(2)} €</td>
                      <td className="py-2 px-4 border-b border-primary/30" data-label="Documents">
-                      {/* Display the two Google Drive links if they exist */}
+                      {entry.facturePath && <div className="mb-1"><LienFichier chemin={entry.facturePath} libelle="Facture" /></div>}
                       {entry.googleDriveLink1 && (
                         <a href={entry.googleDriveLink1} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center mb-1">
                           Facture GDrive 1 <ExternalLink size={16} className="ml-1"/>
@@ -247,7 +257,7 @@ const VehicleDetail: React.FC = () => {
                           Facture GCS <ExternalLink size={16} className="ml-1"/>
                         </a>
                       )}
-                       {!entry.googleDriveLink1 && !entry.googleDriveLink2 && !entry.invoiceUrl && '-'} {/* Display '-' if no links */}
+                       {!entry.facturePath && !entry.googleDriveLink1 && !entry.googleDriveLink2 && !entry.invoiceUrl && '-'} {/* Display '-' if no links */}
                     </td>
                     <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                       <Link
@@ -312,6 +322,7 @@ const VehicleDetail: React.FC = () => {
                     <td className="py-2 px-4 border-b border-primary/30" data-label="Validité">{entry.validity}</td>
                     <td className="py-2 px-4 border-b border-primary/30" data-label="Défauts Majeurs">{entry.majorFailures || '-'}</td>
                      <td className="py-2 px-4 border-b border-primary/30" data-label="Document">
+                       {entry.pvPath && <LienFichier chemin={entry.pvPath} libelle="Procès-verbal" />}
                        {entry.reportUrl && (
                         <a href={entry.reportUrl} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline flex items-center">
                           Rapport GCS <ExternalLink size={16} className="ml-1"/>
@@ -322,8 +333,8 @@ const VehicleDetail: React.FC = () => {
                           Rapport GDrive <ExternalLink size={16} className="ml-1"/>
                         </a>
                       )}
-                       {!entry.reportUrl && !entry.googleDriveLink && '-'}
-                    </td> {/* Display link */}
+                       {!entry.pvPath && !entry.reportUrl && !entry.googleDriveLink && '-'}
+                    </td>
                     <td className="py-2 px-4 border-b border-primary/30 text-right" data-label="Actions">
                        <Link
                         to={`/vehicle/${vehicleId}/edit-controle-technique/${entry.id}`}

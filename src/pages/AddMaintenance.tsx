@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ChampFichier } from '../components/Fichiers';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { addMaintenanceEntry } from '../utils/donnees';
@@ -16,6 +17,7 @@ const AddMaintenance: React.FC = () => {
   // Reverted state for two Google Drive links
   const [googleDriveLink1, setGoogleDriveLink1] = useState('');
   const [googleDriveLink2, setGoogleDriveLink2] = useState('');
+  const [facturePath, setFacturePath] = useState<string | undefined>();
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,6 +50,7 @@ const AddMaintenance: React.FC = () => {
       // Include the two Google Drive links if provided
       googleDriveLink1: googleDriveLink1 || undefined,
       googleDriveLink2: googleDriveLink2 || undefined,
+      facturePath,
     };
 
     try {
@@ -145,6 +148,12 @@ const AddMaintenance: React.FC = () => {
               />
            </div>
         </div>
+
+        {vehicleId && (
+          <div className="mt-4">
+            <ChampFichier vehicleId={vehicleId} libelle="Facture (photo ou PDF)" chemin={facturePath} onChange={setFacturePath} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <button

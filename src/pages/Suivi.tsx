@@ -14,7 +14,7 @@ const Suivi: React.FC = () => {
       setError(null);
       try {
         const data = await getVehicles();
-        setVehicles(data);
+        setVehicles(data.filter(v => !v.soldDate)); // les véhicules vendus ne sont plus suivis
       } catch (err) {
         console.error("Error fetching vehicles:", err);
         setError("Erreur lors du chargement des données de suivi.");

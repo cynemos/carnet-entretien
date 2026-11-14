@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ChampFichier } from '../components/Fichiers';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getVehicleById, updateMaintenanceEntry } from '../utils/donnees';
 import { MaintenanceEntry } from '../types';
@@ -18,6 +19,7 @@ const EditMaintenance: React.FC = () => {
   // Reverted state for two Google Drive links
   const [googleDriveLink1, setGoogleDriveLink1] = useState('');
   const [googleDriveLink2, setGoogleDriveLink2] = useState('');
+  const [facturePath, setFacturePath] = useState<string | undefined>();
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -43,6 +45,7 @@ const EditMaintenance: React.FC = () => {
             // Load existing two links
             setGoogleDriveLink1(foundEntry.googleDriveLink1 || '');
             setGoogleDriveLink2(foundEntry.googleDriveLink2 || '');
+            setFacturePath(foundEntry.facturePath);
           } else {
             setError("Maintenance entry not found.");
           }
@@ -79,6 +82,7 @@ const EditMaintenance: React.FC = () => {
       // Update the two Google Drive links
       googleDriveLink1: googleDriveLink1 || undefined,
       googleDriveLink2: googleDriveLink2 || undefined,
+      facturePath,
       // invoiceUrl is not updated via file upload anymore
       invoiceUrl: entry.invoiceUrl, // Keep existing GCS URL if any
     };
@@ -193,6 +197,12 @@ const EditMaintenance: React.FC = () => {
                {entry.googleDriveLink2 && !googleDriveLink2 && <p className="text-gray-400 text-sm mt-2">Lien Google Drive existant : <a href={entry.googleDriveLink2} target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Voir</a></p>}
            </div>
         </div>
+
+        {vehicleId && (
+          <div className="mt-4">
+            <ChampFichier vehicleId={vehicleId} libelle="Facture (photo ou PDF)" chemin={facturePath} onChange={setFacturePath} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <button

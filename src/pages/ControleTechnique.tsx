@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { ChampFichier } from '../components/Fichiers';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { addControleTechniqueEntry } from '../utils/donnees';
@@ -21,6 +22,7 @@ const ControleTechnique: React.FC = () => {
   const [exhaustEmissions, setExhaustEmissions] = useState('');
   const [headlights, setHeadlights] = useState('');
   const [googleDriveLink, setGoogleDriveLink] = useState(''); // State for Google Drive link
+  const [pvPath, setPvPath] = useState<string | undefined>();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +46,7 @@ const ControleTechnique: React.FC = () => {
       parkingBrake,
       exhaustEmissions,
       headlights,
+      pvPath,
     };
 
     try {
@@ -175,6 +178,12 @@ const ControleTechnique: React.FC = () => {
             />
           </div>
         </div>
+
+        {vehicleId && (
+          <div className="mt-4">
+            <ChampFichier vehicleId={vehicleId} libelle="Procès-verbal (photo ou PDF)" chemin={pvPath} onChange={setPvPath} />
+          </div>
+        )}
 
         <div className="flex items-center justify-between mt-6">
           <button

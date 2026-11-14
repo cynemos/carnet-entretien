@@ -1,188 +1,241 @@
+// Export PDF de l'historique d'un véhicule, mis en page comme une fiche d'atelier :
+// bandeau brun et laiton, tableaux à lignes alternées, totaux, pied de page numéroté.
 import { jsPDF } from 'jspdf';
 import { Vehicle } from '../types';
-import { format, isValid, differenceInDays } from 'date-fns'; // Import date-fns functions
-import { libelleType } from './alertes';
-import { fr } from 'date-fns/locale'; // Import French locale
+import { format, isValid, differenceInMonths } from 'date-fns';
+import { libelleType, kmActuel } from './alertes';
+
+type RVB = [number, number, number];
+const BRUN: RVB = [34, 27, 21];
+const LAITON: RVB = [212, 148, 58];
+const CREME: RVB = [250, 246, 236];
+const ENCRE: RVB = [40, 32, 25];
+const GRIS: RVB = [120, 108, 95];
+const LIGNE_PAIRE: RVB = [243, 234, 214];
+
+// Espaces ordinaires : les polices standard du PDF ne connaissent pas l'espace fine insécable
+const nombre = (n: number, decimales = 0) =>
+  n.toFixed(decimales).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+const euros = (n: number) => `${nombre(n, 2)} €`;
+const dateFr = (d?: string) => (d && isValid(new Date(d)) ? format(new Date(d), 'dd/MM/yyyy') : '—');
+
+interface Colonne { titre: string; largeur: number; droite?: boolean }
 
 export const generateVehicleHistoryPdf = (vehicle: Vehicle) => {
-  const doc = new jsPDF();
+  const doc = new jsPDF({ unit: 'mm', format: 'a4' });
+  const L = doc.internal.pageSize.getWidth();
+  const H = doc.internal.pageSize.getHeight();
+  const M = 14;
+  let y = 0;
 
-  let yOffset = 10;
-  const margin = 10;
-  const lineHeight = 7;
-  const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight(); // Get page height
+  const couleur = (c: RVB, quoi: 'texte' | 'fond' | 'trait') =>
+    quoi === 'texte' ? doc.setTextColor(...c) : quoi === 'fond' ? doc.setFillColor(...c) : doc.setDrawColor(...c);
 
-  // Set font and size
-  doc.setFont('helvetica');
-
-  // Function to add page number
-  const addPageNumber = (doc: jsPDF, pageNum: number) => {
-      doc.setFontSize(8);
-      doc.setTextColor(150);
-      doc.text('Page ' + pageNum, pageWidth - margin, pageHeight - margin);
-      doc.setFontSize(10); // Reset font size for content
-      doc.setTextColor(0); // Reset text color
+  const fondPage = () => {
+    couleur(CREME, 'fond');
+    doc.rect(0, 0, L, H, 'F');
   };
 
-  // Function to check and add new page if needed
-  const checkPageBreak = () => {
-      if (yOffset > pageHeight - margin * 2) { // Check if close to bottom margin
-          doc.addPage();
-          yOffset = margin; // Reset yOffset for new page
-          addPageNumber(doc, doc.getNumberOfPages()); // Add page number to new page
+  const bandeau = (petit = false) => {
+    const h = petit ? 14 : 34;
+    couleur(BRUN, 'fond');
+    doc.rect(0, 0, L, h, 'F');
+    couleur(LAITON, 'fond');
+    doc.rect(0, h, L, 1.2, 'F');
+    doc.setFont('helvetica', 'bold');
+    couleur(LAITON, 'texte');
+    if (petit) {
+      doc.setFontSize(10);
+      doc.text(`${vehicle.make} ${vehicle.model} — carnet d'entretien`, M, 9);
+    } else {
+      doc.setFontSize(9);
+      doc.text("CARNET D'ENTRETIEN", M, 11, { charSpace: 1.2 });
+      doc.setFontSize(22);
+      doc.text(`${vehicle.make} ${vehicle.model}`, M, 24);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(10);
+      couleur(CREME, 'texte');
+      doc.text(`${libelleType(vehicle.type)} · ${vehicle.year}${vehicle.soldDate ? ` · vendu le ${dateFr(vehicle.soldDate)}` : ''}`, M, 30);
+      if (vehicle.licensePlate) {
+        // Plaque noire à l'ancienne
+        const w = doc.getTextWidth(vehicle.licensePlate) * 1.25 + 10;
+        doc.setFillColor(10, 10, 10);
+        doc.setDrawColor(190, 190, 190);
+        doc.setLineWidth(0.6);
+        doc.roundedRect(L - M - w, 13, w, 10, 1.2, 1.2, 'FD');
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.setTextColor(232, 232, 232);
+        doc.text(vehicle.licensePlate, L - M - w / 2, 20, { align: 'center', charSpace: 0.6 });
       }
+    }
+    y = h + 10;
   };
 
+  const nouvellePage = () => {
+    doc.addPage();
+    fondPage();
+    bandeau(true);
+  };
 
-  // Title
-  doc.setFontSize(18);
-  doc.setTextColor(41, 128, 185); // Set title color (e.g., a shade of blue)
-  doc.text(`Historique du Véhicule: ${vehicle.make} ${vehicle.model} (${vehicle.year})`, margin, yOffset);
-  yOffset += lineHeight * 2;
+  const place = (hauteur: number) => {
+    if (y + hauteur > H - 18) nouvellePage();
+  };
 
-  // Vehicle Details
-  doc.setFontSize(12);
-  doc.setTextColor(0); // Reset text color to black
-  doc.text(`Type: ${libelleType(vehicle.type)}`, margin, yOffset); yOffset += lineHeight;
-  doc.text(`Kilométrage initial: ${vehicle.initialMileage} km`, margin, yOffset); yOffset += lineHeight;
-  // Check if purchaseDate is valid before formatting
-  doc.text(`Date d'achat: ${isValid(new Date(vehicle.purchaseDate)) ? format(new Date(vehicle.purchaseDate), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}`, margin, yOffset); yOffset += lineHeight;
-  if (vehicle.firstRegistrationDate && isValid(new Date(vehicle.firstRegistrationDate))) {
-     doc.text(`1ère mise en circulation: ${format(new Date(vehicle.firstRegistrationDate), 'dd/MM/yyyy', { locale: fr })}`, margin, yOffset); yOffset += lineHeight;
-  }
-  if (vehicle.vin) {
-    doc.text(`VIN: ${vehicle.vin}`, margin, yOffset); yOffset += lineHeight;
-  }
-  if (vehicle.licensePlate) { // Added License Plate
-    doc.text(`Plaque: ${vehicle.licensePlate}`, margin, yOffset); yOffset += lineHeight;
-  }
-   // Removed Carte Grise Link from PDF
-  yOffset += lineHeight * 1.5; // Add some space
+  const titreSection = (texte: string) => {
+    place(16);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(13);
+    couleur(BRUN, 'texte');
+    doc.text(texte.toUpperCase(), M, y, { charSpace: 0.4 });
+    couleur(LAITON, 'trait');
+    doc.setLineWidth(0.8);
+    doc.line(M, y + 2, M + 40, y + 2);
+    doc.setLineWidth(0.2);
+    doc.line(M, y + 3.2, M + 40, y + 3.2);
+    y += 9;
+  };
 
-  // Maintenance History Section (Text only, no table)
-  checkPageBreak(); // Check before starting new section
-  doc.setFontSize(16);
-  doc.setTextColor(41, 128, 185); // Set section title color
-  doc.text('Historique d\'entretien', margin, yOffset);
-  yOffset += lineHeight * 1.5;
-
-  doc.setTextColor(0); // Reset text color
-  doc.setFontSize(10); // Smaller font for details
-
-  if (vehicle.maintenanceHistory && vehicle.maintenanceHistory.length > 0) {
-    // Sort by date ascending
-    const sortedMaintenance = vehicle.maintenanceHistory.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-    sortedMaintenance.forEach(entry => {
-      checkPageBreak(); // Check before each entry
-      // Check if entry.date is valid before formatting
-      doc.text(`- Date: ${isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}, Kilométrage: ${entry.mileage} km, Coût: ${(entry.partsCost + entry.laborCost).toFixed(2)} €`, margin, yOffset);
-      yOffset += lineHeight;
-      // Handle description wrapping manually if needed, or keep it simple
-      doc.text(`  Description: ${entry.description}`, margin + 5, yOffset);
-      yOffset += lineHeight;
-      // Removed document links from PDF
-      yOffset += lineHeight * 0.5; // Space between entries
+  const tableau = (colonnes: Colonne[], lignes: string[][], pied?: string[]) => {
+    const entete = () => {
+      couleur(BRUN, 'fond');
+      doc.rect(M, y, L - 2 * M, 7, 'F');
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      couleur(LAITON, 'texte');
+      let x = M;
+      colonnes.forEach(c => {
+        doc.text(c.titre.toUpperCase(), c.droite ? x + c.largeur - 2 : x + 2, y + 4.7, { align: c.droite ? 'right' : 'left' });
+        x += c.largeur;
+      });
+      y += 7;
+    };
+    place(15);
+    entete();
+    doc.setFontSize(9);
+    lignes.forEach((ligne, i) => {
+      doc.setFont('helvetica', 'normal');
+      const cellules = ligne.map((v, j) => doc.splitTextToSize(v, colonnes[j].largeur - 4) as string[]);
+      const h = Math.max(...cellules.map(c => c.length)) * 4.2 + 2.6;
+      if (y + h > H - 18) { nouvellePage(); entete(); doc.setFontSize(9); doc.setFont('helvetica', 'normal'); }
+      if (i % 2 === 0) { couleur(LIGNE_PAIRE, 'fond'); doc.rect(M, y, L - 2 * M, h, 'F'); }
+      couleur(ENCRE, 'texte');
+      let x = M;
+      cellules.forEach((c, j) => {
+        const col = colonnes[j];
+        doc.text(c, col.droite ? x + col.largeur - 2 : x + 2, y + 4.4, { align: col.droite ? 'right' : 'left' });
+        x += col.largeur;
+      });
+      y += h;
     });
+    if (pied) {
+      place(8);
+      couleur(LAITON, 'trait');
+      doc.setLineWidth(0.5);
+      doc.line(M, y, L - M, y);
+      doc.setFont('helvetica', 'bold');
+      couleur(BRUN, 'texte');
+      let x = M;
+      pied.forEach((v, j) => {
+        const col = colonnes[j];
+        if (v) doc.text(v, col.droite ? x + col.largeur - 2 : x + 2, y + 5, { align: col.droite ? 'right' : 'left' });
+        x += col.largeur;
+      });
+      y += 8;
+    }
+    y += 6;
+  };
 
+  // Page 1 : identité du véhicule
+  fondPage();
+  bandeau();
+
+  const fiche: [string, string][] = [
+    ['Kilométrage actuel', `${nombre(kmActuel(vehicle))} km`],
+    ["Kilométrage à l'achat", `${nombre(vehicle.initialMileage || 0)} km`],
+    ["Date d'achat", dateFr(vehicle.purchaseDate)],
+    ['1re mise en circulation', dateFr(vehicle.firstRegistrationDate)],
+    ['N° de série (VIN)', vehicle.vin || '—'],
+    ['Échéances', `CT tous les ${vehicle.ctIntervalYears} ans, entretien tous les ${vehicle.maintenanceIntervalMonths} mois${vehicle.maintenanceIntervalKm ? ` ou ${nombre(vehicle.maintenanceIntervalKm)} km` : ''}`],
+  ];
+  const colonneW = (L - 2 * M) / 2;
+  fiche.forEach(([k, v], i) => {
+    const x = M + (i % 2) * colonneW;
+    if (i % 2 === 0 && i > 0) y += 12;
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7.5);
+    couleur(GRIS, 'texte');
+    doc.text(k.toUpperCase(), x, y);
+    doc.setFont('courier', 'normal');
+    doc.setFontSize(10.5);
+    couleur(ENCRE, 'texte');
+    doc.text(doc.splitTextToSize(v, colonneW - 6)[0], x, y + 5);
+  });
+  y += 18;
+
+  // Entretiens
+  const entretiens = [...vehicle.maintenanceHistory].sort((a, b) => a.date.localeCompare(b.date));
+  const total = entretiens.reduce((s, e) => s + (e.totalCost || 0), 0);
+  titreSection(`Entretiens (${entretiens.length})`);
+  if (entretiens.length) {
+    tableau(
+      [{ titre: 'Date', largeur: 22 }, { titre: 'Km', largeur: 22, droite: true }, { titre: 'Intervention', largeur: 92 },
+        { titre: 'Pièces', largeur: 23, droite: true }, { titre: 'Total', largeur: 23, droite: true }],
+      entretiens.map(e => [dateFr(e.date), nombre(e.mileage || 0), e.description || '—', euros(e.partsCost || 0), euros(e.totalCost || 0)]),
+      ['', '', 'Total investi', '', euros(total)],
+    );
   } else {
-    checkPageBreak(); // Check before adding "No entries" text
-    doc.text('Aucun historique d\'entretien enregistré.', margin, yOffset);
-    yOffset += lineHeight;
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(10); couleur(GRIS, 'texte');
+    doc.text('Aucun entretien enregistré.', M, y); y += 10;
   }
 
-  yOffset += lineHeight; // Add some space before next section
-
-  // Controle Technique History Section (Text only, no table)
-  checkPageBreak(); // Check before starting new section
-  doc.setFontSize(16);
-  doc.setTextColor(41, 128, 185); // Set section title color
-  doc.text('Historique des Contrôles Techniques', margin, yOffset);
-  yOffset += lineHeight * 1.5;
-
-  doc.setTextColor(0); // Reset text color
-  doc.setFontSize(9); // Smaller font for CT details
-
-  if (vehicle.controleTechniqueHistory && vehicle.controleTechniqueHistory.length > 0) {
-     // Sort by date ascending
-     const sortedCt = vehicle.controleTechniqueHistory.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-     sortedCt.forEach(entry => {
-        checkPageBreak(); // Check before each entry
-        // Check if entry.date is valid before formatting
-        doc.text(`- Date: ${isValid(new Date(entry.date)) ? format(new Date(entry.date), 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}, Km: ${entry.mileage} km, Validité: ${entry.validity}`, margin, yOffset);
-        yOffset += lineHeight;
-        doc.text(`  Défauts Majeurs: ${entry.majorFailures || '-'}`, margin + 5, yOffset);
-        yOffset += lineHeight;
-        // Removed document links from PDF
-        yOffset += lineHeight * 0.5; // Space between entries
-     });
-
+  // Contrôles techniques
+  const controles = [...vehicle.controleTechniqueHistory].sort((a, b) => a.date.localeCompare(b.date));
+  titreSection(`Contrôles techniques (${controles.length})`);
+  if (controles.length) {
+    tableau(
+      [{ titre: 'Date', largeur: 22 }, { titre: 'Km', largeur: 22, droite: true }, { titre: 'Validité', largeur: 30 },
+        { titre: 'Défaillances majeures', largeur: 54 }, { titre: 'Défaillances mineures', largeur: 54 }],
+      controles.map(c => [dateFr(c.date), nombre(c.mileage || 0), c.validity || '—', c.majorFailures || '—', c.minorFailures || '—']),
+    );
   } else {
-    checkPageBreak(); // Check before adding "No entries" text
-    doc.text('Aucun contrôle technique enregistré.', margin, yOffset);
-    yOffset += lineHeight;
+    doc.setFont('helvetica', 'italic'); doc.setFontSize(10); couleur(GRIS, 'texte');
+    doc.text('Aucun contrôle technique enregistré.', M, y); y += 10;
   }
 
-  yOffset += lineHeight; // Add some space before next section
-
-  // Previous Owners Section
-  checkPageBreak(); // Check before starting new section
-  doc.setFontSize(16);
-  doc.setTextColor(41, 128, 185); // Set section title color
-  doc.text('Propriétaires Précédents', margin, yOffset);
-  yOffset += lineHeight * 1.5;
-
-  doc.setTextColor(0); // Reset text color
-  doc.setFontSize(10); // Smaller font for details
-
-  if (vehicle.previousOwners && vehicle.previousOwners.length > 0) {
-     // Sort by start date ascending
-     const sortedOwners = vehicle.previousOwners.sort((a, b) => new Date(a.startDate).getTime() - new Date(b.startDate).getTime());
-
-     sortedOwners.forEach(owner => {
-        checkPageBreak(); // Check before each entry
-
-        const startDate = new Date(owner.startDate);
-        const endDate = new Date(owner.endDate);
-        let duration = 'Dates invalides';
-
-        if (isValid(startDate) && isValid(endDate)) {
-            const diffDays = differenceInDays(endDate, startDate);
-            if (diffDays < 0) {
-                duration = 'Date de fin avant date de début';
-            } else {
-                const years = Math.floor(diffDays / 365);
-                const remainingDays = diffDays % 365;
-                const months = Math.floor(remainingDays / 30); // Simple month calculation
-
-                const durationParts = [];
-                if (years > 0) durationParts.push(`${years} an(s)`);
-                if (months > 0) durationParts.push(`${months} mois`);
-                if (years === 0 && months === 0 && diffDays >= 0) durationParts.push(`${diffDays} jour(s)`); // Handle less than a month
-
-                duration = durationParts.length > 0 ? durationParts.join(' ') : 'Moins d\'un jour';
-            }
+  // Anciens propriétaires
+  const proprietaires = [...vehicle.previousOwners].sort((a, b) => a.startDate.localeCompare(b.startDate));
+  if (proprietaires.length) {
+    titreSection('Propriétaires successifs');
+    tableau(
+      [{ titre: 'Nom', largeur: 70 }, { titre: 'Du', largeur: 30 }, { titre: 'Au', largeur: 30 }, { titre: 'Durée', largeur: 52 }],
+      proprietaires.map(p => {
+        const debut = new Date(p.startDate), fin = new Date(p.endDate);
+        let duree = '—';
+        if (isValid(debut) && isValid(fin) && fin >= debut) {
+          const mois = differenceInMonths(fin, debut);
+          duree = [mois >= 12 ? `${Math.floor(mois / 12)} an${mois >= 24 ? 's' : ''}` : '', mois % 12 ? `${mois % 12} mois` : '']
+            .filter(Boolean).join(' ') || "moins d'un mois";
         }
-
-
-        doc.text(`- Nom: ${owner.name || '-'}, Début: ${isValid(startDate) ? format(startDate, 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}, Fin: ${isValid(endDate) ? format(endDate, 'dd/MM/yyyy', { locale: fr }) : 'Date invalide'}, Durée: ${duration}`, margin, yOffset);
-        yOffset += lineHeight;
-        yOffset += lineHeight * 0.5; // Space between entries
-     });
-
-  } else {
-    checkPageBreak(); // Check before adding "No entries" text
-    doc.text('Aucun ancien propriétaire enregistré.', margin, yOffset);
-    yOffset += lineHeight;
+        return [p.name || '—', dateFr(p.startDate), dateFr(p.endDate), duree];
+      }),
+    );
   }
 
+  // Pied de page sur chaque page
+  const pages = doc.getNumberOfPages();
+  for (let i = 1; i <= pages; i++) {
+    doc.setPage(i);
+    couleur(LAITON, 'trait');
+    doc.setLineWidth(0.3);
+    doc.line(M, H - 12, L - M, H - 12);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(8);
+    couleur(GRIS, 'texte');
+    doc.text(`Édité le ${format(new Date(), 'dd/MM/yyyy')} · carnet.cyneprod.org`, M, H - 7);
+    doc.text(`Page ${i} / ${pages}`, L - M, H - 7, { align: 'right' });
+  }
 
-   // Add footer on the last page (or first if only one page)
-   addPageNumber(doc, doc.getNumberOfPages());
-
-
-  // Save the PDF
-  doc.save(`historique_${vehicle.make}_${vehicle.model}.pdf`);
+  const nom = `${vehicle.make}-${vehicle.model}`.normalize('NFD').replace(/[^\w-]+/g, '-').replace(/-+/g, '-');
+  doc.save(`carnet-${nom}-${format(new Date(), 'yyyy-MM-dd')}.pdf`);
 };

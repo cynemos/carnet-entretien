@@ -12,6 +12,13 @@ export interface Vehicle {
   imageUrl?: string; // Optional URL for vehicle image
   carteGriseGoogleDriveLink?: string; // Optional Google Drive link for carte grise
   licensePlate?: string; // New: Optional license plate field
+  currentMileage?: number; // dernier relevé du compteur
+  ctIntervalYears: number; // 2 en général, 5 pour un véhicule de collection
+  maintenanceIntervalMonths: number;
+  maintenanceIntervalKm?: number;
+  soldDate?: string; // renseignée = véhicule vendu
+  photoPath?: string; // chemin dans le stockage du serveur
+  carteGrisePath?: string;
   maintenanceHistory: MaintenanceEntry[];
   controleTechniqueHistory: ControleTechniqueEntry[];
   previousOwners: PreviousOwner[];
@@ -28,6 +35,7 @@ export interface MaintenanceEntry {
   invoiceUrl?: string; // URL to the invoice file in storage (if using storage - kept for backward compatibility if needed)
   googleDriveLink1?: string; // Optional Google Drive link 1
   googleDriveLink2?: string; // Optional Google Drive link 2
+  facturePath?: string; // facture stockée sur le serveur
 }
 
 export interface ControleTechniqueEntry {
@@ -46,6 +54,7 @@ export interface ControleTechniqueEntry {
   headlights?: string; // e.g., 'OK'
   reportUrl?: string; // URL to the report file in storage (if using storage)
   googleDriveLink?: string; // Optional Google Drive link for CT report
+  pvPath?: string; // procès-verbal stocké sur le serveur
 }
 
 export interface PreviousOwner {

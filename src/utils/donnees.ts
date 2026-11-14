@@ -2,6 +2,7 @@
 // signatures, pour que les pages n'aient pas à changer. Les historiques, autrefois des listes
 // dans le document du véhicule, sont des tables séparées ; on les recharge avec le véhicule.
 import { supabase } from '../lib/supabase';
+import { supprimerFichiers, supprimerFichiersVehicule } from './fichiers';
 import { Vehicle, MaintenanceEntry, ControleTechniqueEntry, PreviousOwner } from '../types';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- lignes brutes renvoyées par PostgREST
@@ -27,6 +28,7 @@ const versEntretien = (l: Ligne): MaintenanceEntry => ({
   totalCost: nombre(l.total_cost),
   googleDriveLink1: l.drive_link_1 ?? undefined,
   googleDriveLink2: l.drive_link_2 ?? undefined,
+  facturePath: l.facture_path ?? undefined,
 });
 
 const versControle = (l: Ligne): ControleTechniqueEntry => ({
@@ -44,6 +46,7 @@ const versControle = (l: Ligne): ControleTechniqueEntry => ({
   exhaustEmissions: l.exhaust_emissions ?? undefined,
   headlights: l.headlights ?? undefined,
   googleDriveLink: l.drive_link ?? undefined,
+  pvPath: l.pv_path ?? undefined,
 });
 
 const versProprietaire = (l: Ligne): PreviousOwner => ({
@@ -66,6 +69,13 @@ const versVehicule = (l: Ligne): Vehicle => ({
   imageUrl: l.image_url ?? undefined,
   carteGriseGoogleDriveLink: l.carte_grise_drive_link ?? undefined,
   licensePlate: l.license_plate ?? undefined,
+  currentMileage: l.current_mileage ?? undefined,
+  ctIntervalYears: l.ct_interval_years ?? 2,
+  maintenanceIntervalMonths: l.maintenance_interval_months ?? 12,
+  maintenanceIntervalKm: l.maintenance_interval_km ?? undefined,
+  soldDate: l.sold_date ?? undefined,
+  photoPath: l.photo_path ?? undefined,
+  carteGrisePath: l.carte_grise_path ?? undefined,
   maintenanceHistory: [...(l.maintenance_entries ?? [])].sort(parCreation).map(versEntretien),
   controleTechniqueHistory: [...(l.controle_technique_entries ?? [])].sort(parCreation).map(versControle),
   previousOwners: [...(l.previous_owners ?? [])].sort(parCreation).map(versProprietaire),
@@ -88,6 +98,13 @@ const ligneVehicule = (v: ChampsVehicule): Ligne => {
   if (a('imageUrl')) l.image_url = ouNull(v.imageUrl);
   if (a('carteGriseGoogleDriveLink')) l.carte_grise_drive_link = ouNull(v.carteGriseGoogleDriveLink);
   if (a('licensePlate')) l.license_plate = ouNull(v.licensePlate);
+  if (a('currentMileage')) l.current_mileage = ouNull(v.currentMileage);
+  if (a('ctIntervalYears')) l.ct_interval_years = nombre(v.ctIntervalYears) || 2;
+  if (a('maintenanceIntervalMonths')) l.maintenance_interval_months = nombre(v.maintenanceIntervalMonths) || 12;
+  if (a('maintenanceIntervalKm')) l.maintenance_interval_km = ouNull(v.maintenanceIntervalKm);
+  if (a('soldDate')) l.sold_date = ouNull(v.soldDate);
+  if (a('photoPath')) l.photo_path = ouNull(v.photoPath);
+  if (a('carteGrisePath')) l.carte_grise_path = ouNull(v.carteGrisePath);
   return l;
 };
 
@@ -99,6 +116,7 @@ const ligneEntretien = (e: Partial<MaintenanceEntry>): Ligne => ({
   labor_cost: nombre(e.laborCost),
   drive_link_1: ouNull(e.googleDriveLink1),
   drive_link_2: ouNull(e.googleDriveLink2),
+  facture_path: ouNull(e.facturePath),
 });
 
 const ligneControle = (e: Partial<ControleTechniqueEntry>): Ligne => ({
@@ -115,6 +133,7 @@ const ligneControle = (e: Partial<ControleTechniqueEntry>): Ligne => ({
   exhaust_emissions: ouNull(e.exhaustEmissions),
   headlights: ouNull(e.headlights),
   drive_link: ouNull(e.googleDriveLink),
+  pv_path: ouNull(e.pvPath),
 });
 
 const ligneProprietaire = (e: Partial<PreviousOwner>): Ligne => ({
@@ -152,6 +171,8 @@ export const updateVehicle = async (vehicleId: string, updatedVehicle: ChampsVeh
 
 export const deleteVehicle = async (vehicleId: string): Promise<void> => {
   verifier(await supabase.from('vehicles').delete().eq('id', vehicleId));
+  // Fichiers du véhicule : un échec ici ne doit pas faire croire que la suppression a échoué
+  await supprimerFichiersVehicule(vehicleId).catch(() => undefined);
 };
 
 // Entretiens
@@ -168,7 +189,8 @@ export const updateMaintenanceEntry = async (vehicleId: string, updatedEntry: Ma
 };
 
 export const deleteMaintenanceEntry = async (vehicleId: string, entryId: string): Promise<void> => {
-  verifier(await supabase.from('maintenance_entries').delete().eq('id', entryId).eq('vehicle_id', vehicleId));
+  const lignes = verifier(await supabase.from('maintenance_entries').delete().eq('id', entryId).eq('vehicle_id', vehicleId).select('facture_path')) as Ligne[];
+  await supprimerFichiers((lignes ?? []).map(l => l.facture_path)).catch(() => undefined);
 };
 
 // Contrôles techniques
@@ -194,7 +216,8 @@ export const updateControleTechniqueEntry = async (vehicleId: string, updatedEnt
 };
 
 export const deleteControleTechniqueEntry = async (vehicleId: string, entryId: string): Promise<void> => {
-  verifier(await supabase.from('controle_technique_entries').delete().eq('id', entryId).eq('vehicle_id', vehicleId));
+  const lignes = verifier(await supabase.from('controle_technique_entries').delete().eq('id', entryId).eq('vehicle_id', vehicleId).select('pv_path')) as Ligne[];
+  await supprimerFichiers((lignes ?? []).map(l => l.pv_path)).catch(() => undefined);
 };
 
 // Anciens propriétaires

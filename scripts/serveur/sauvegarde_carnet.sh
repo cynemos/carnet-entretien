@@ -52,6 +52,13 @@ docker exec "$DB" pg_dump -U postgres -d postgres -Fc > "$W/base.dump"
 docker exec "$DB" pg_dumpall -U postgres --roles-only > "$W/roles.sql"
 docker exec -i "$DB" pg_restore -l < "$W/base.dump" > /dev/null || echec "base.dump illisible"
 
+# 1 bis. Fichiers stockés (photos, cartes grises, factures, procès-verbaux), depuis la v1.4.0
+STOCKAGE=supabase_storage_carnet
+if docker ps --format '{{.Names}}' | grep -qx "$STOCKAGE"; then
+  docker exec "$STOCKAGE" tar -cf - -C /mnt . | gzip -6 > "$W/fichiers.tar.gz"
+  gzip -t "$W/fichiers.tar.gz" || echec "fichiers.tar.gz illisible"
+fi
+
 # 2. Configurations nécessaires pour tout reconstruire
 mkdir -p "$W/config"
 cp /home/cynemos/supabase-carnet/supabase/config.toml "$W/config/supabase-config.toml"
@@ -67,7 +74,8 @@ git -C /home/cynemos/apps/carnet describe --tags --always > "$W/config/version-s
     select 'entretiens ' || count(*) from maintenance_entries union all
     select 'controles_techniques ' || count(*) from controle_technique_entries union all
     select 'anciens_proprietaires ' || count(*) from previous_owners union all
-    select 'comptes ' || count(*) from auth.users"
+    select 'comptes ' || count(*) from auth.users union all
+    select 'fichiers_stockage ' || count(*) from storage.objects"
 } > "$W/INVENTAIRE.txt"
 ( cd "$W" && find . -type f ! -name SHA256SUMS -exec sha256sum {} + > SHA256SUMS )
 log "Sauvegarde locale : $(du -sh "$W" | cut -f1) — $(tr '\n' ' ' < "$W/INVENTAIRE.txt" | cut -c1-200)"

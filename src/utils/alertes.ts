@@ -8,8 +8,8 @@ export interface Alerte { niveau: NiveauAlerte; message: string }
 const FORMATS_DATE = ['dd/MM/yyyy', 'yyyy-MM-dd', 'dd-MM-yyyy', 'dd.MM.yyyy', 'dd/MM/yy'];
 
 // La validité du CT est un texte libre : le plus souvent une date (« 26/11/2026 »),
-// parfois « 2 ans » ou « contre visite ».
-const echeanceCT = (dateCT: string, validite: string): Date | null => {
+// parfois « 2 ans » ou « contre visite ». Sinon : date du CT + périodicité du véhicule.
+const echeanceCT = (dateCT: string, validite: string, intervalleAns: number): Date | null => {
   const texte = validite.trim();
   for (const f of FORMATS_DATE) {
     const d = parse(texte, f, new Date());
@@ -19,39 +19,59 @@ const echeanceCT = (dateCT: string, validite: string): Date | null => {
   if (!isValid(base)) return null;
   if (/contre[\s-]?visite/i.test(texte)) return addMonths(base, 2);
   const ans = texte.match(/(\d+)\s*ans?/i);
-  if (ans) return addYears(base, Number(ans[1]));
-  return null;
+  return addYears(base, ans ? Number(ans[1]) : intervalleAns);
 };
 
 const plusRecent = <T extends { date: string }>(liste: T[]): T | undefined =>
   [...liste].sort((a, b) => b.date.localeCompare(a.date))[0];
 
 const jour = (d: Date) => format(d, 'dd/MM/yyyy');
+const km = (n: number) => `${n.toLocaleString('fr-FR')} km`;
 
 const situer = (echeance: Date, aujourdhui: Date) =>
   isBefore(echeance, aujourdhui) ? 'urgent' : isBefore(echeance, addMonths(aujourdhui, 3)) ? 'bientot' : null;
 
+// Kilométrage le plus récent connu : relevé manuel, entretiens, CT
+export const kmActuel = (v: Vehicle) => Math.max(
+  v.currentMileage || 0,
+  v.initialMileage || 0,
+  ...v.maintenanceHistory.map(e => e.mileage || 0),
+  ...v.controleTechniqueHistory.map(e => e.mileage || 0),
+);
+
+export const estVendu = (v: Vehicle) => !!v.soldDate;
+
 export const alertesVehicule = (vehicule: Vehicle, aujourdhui = new Date()): Alerte[] => {
+  if (estVendu(vehicule)) return [];
   const alertes: Alerte[] = [];
 
-  // Entretien conseillé une fois par an
+  // Entretien : tous les N mois, et/ou tous les N km
   const entretien = plusRecent(vehicule.maintenanceHistory);
+  const mois = vehicule.maintenanceIntervalMonths || 12;
   if (!entretien) {
     alertes.push({ niveau: 'info', message: 'Aucun entretien enregistré.' });
   } else {
-    const prochain = addYears(parseISO(entretien.date), 1);
+    const prochain = addMonths(parseISO(entretien.date), mois);
     const niveau = situer(prochain, aujourdhui);
-    if (niveau === 'urgent') alertes.push({ niveau, message: `Entretien annuel en retard depuis le ${jour(prochain)}` });
-    if (niveau === 'bientot') alertes.push({ niveau, message: `Entretien annuel à prévoir avant le ${jour(prochain)}` });
+    if (niveau === 'urgent') alertes.push({ niveau, message: `Entretien en retard depuis le ${jour(prochain)} (tous les ${mois} mois)` });
+    if (niveau === 'bientot') alertes.push({ niveau, message: `Entretien à prévoir avant le ${jour(prochain)}` });
+
+    const pas = vehicule.maintenanceIntervalKm;
+    if (pas && entretien.mileage) {
+      const prochainKm = entretien.mileage + pas;
+      const reste = prochainKm - kmActuel(vehicule);
+      if (reste <= 0) alertes.push({ niveau: 'urgent', message: `Entretien dû à ${km(prochainKm)} : dépassé de ${km(-reste)}` });
+      else if (reste <= pas * 0.1) alertes.push({ niveau: 'bientot', message: `Entretien dans ${km(reste)} (à ${km(prochainKm)})` });
+    }
   }
 
   const ct = plusRecent(vehicule.controleTechniqueHistory);
   if (!ct) {
     alertes.push({ niveau: 'info', message: 'Aucun contrôle technique enregistré.' });
   } else {
-    const echeance = echeanceCT(ct.date, ct.validity ?? '');
+    const echeance = echeanceCT(ct.date, ct.validity ?? '', vehicule.ctIntervalYears || 2);
     if (!echeance) {
-      alertes.push({ niveau: 'info', message: `Validité du dernier CT illisible : « ${ct.validity} »` });
+      alertes.push({ niveau: 'info', message: `Date du dernier CT illisible.` });
     } else {
       const niveau = situer(echeance, aujourdhui);
       if (niveau === 'urgent') alertes.push({ niveau, message: `Contrôle technique expiré depuis le ${jour(echeance)}` });
